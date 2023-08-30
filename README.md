@@ -88,3 +88,35 @@ With this final step you are done! Ask for someone to review and merge the branc
 > :$ git checkout main
 
 Now you can start your next task by following all the steps again!
+
+
+___
+## Project Description
+
+### <u>Main Features</u>
+
+1. User Management
+- New users must be able to register themselves in the system.
+- Users need to log in to access the system
+- Users must be able to reset their password.
+
+2. Blog Front Page
+- A user must be able to have an initial page listing his Blog articles with a preivew of the article
+- By clicking the user is redirected to the blog articles
+- The initial page must have a menu, with article organized as categories/tags.
+
+3. Articles Management
+- A user must be able to create and edit his own blog articles
+- A user must be able to select wich articles must appear in the initial page and be public available
+- Articles can be in three diferent states, "published", "private", "editing"
+- Only published articles can appear in the blog
+
+3. Article sharing
+- A user must be able to request permission to publish someonelses article
+- If user gets an authorization, the article can be listed in the front page of the blog
+- When clicking on details the visitor is redirected to the original authors blog and article.
+
+### <u>Additional Features</u>
+1. Comments
+- A visitor must be able to comment on articles.
+- Comments can have comments.
