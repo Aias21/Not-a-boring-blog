@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models.post_category import Post, Category
+from .models.post import Post, Category
 
 # Register your models here.
 
