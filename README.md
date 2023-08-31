@@ -63,6 +63,8 @@ For example for a post we will create in /models a new .py file called post.py (
 
 #### <i>Step 6 - When you are done stage and commit your work:</i>
 
+User :$ git status to check all files that need to be staged then add the ones you worked on with:
+
 > :$ git add <name_of_file>
 
 or 
@@ -72,6 +74,8 @@ or
 to add all files, make sure you don't stage any unwanted files, to unstage files use:
 
 > :$ git reset <name_of_file>
+
+Check with git status to see what files are staged, staged files are marked with green.
 
 Finally commit using a descriptive message:
 
@@ -88,6 +92,12 @@ With this final step you are done! Ask for someone to review and merge the branc
 > :$ git checkout main
 
 Now you can start your next task by following all the steps again!
+
+#### <i> Step 8 - additional - delete former work branch:</i>
+
+> :$ git branch -d <your_former_working_branch>
+
+!!! Make sure you do not delete your main branch!!!
 
 
 ___
