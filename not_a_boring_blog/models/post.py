@@ -15,7 +15,7 @@ class Post(models.Model):
         ('private', 'Private'),
         ('editing', 'Editing'),
     ]
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ManyToManyField(Category) # on_delete=models.CASCADE is not applied in ManyToMany
     title = models.CharField(max_length=255)
     body = models.TextField()
     user_id = models.ForeignKey(Role, on_delete=models.CASCADE)
