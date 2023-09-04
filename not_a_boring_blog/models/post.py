@@ -1,3 +1,4 @@
+# The above code defines two Django models, Category and Post, with various fields and relationships.
 from django.db import models
 from .user import Role
 
