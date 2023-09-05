@@ -61,10 +61,12 @@ class PostUpdateSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    last_updated = serializers.DateTimeField(validators=[DateValidator()])
+    last_updated = serializers.DateTimeField(validators=[DateValidator()], required=False)
     title = serializers.CharField(required=True, max_length=255, validators=[UniqueTitleValidator()])
-    created_at = serializers.DateTimeField(validators=[DateValidator()])
-
+    created_at = serializers.DateTimeField(validators=[DateValidator()], required=False)
+    category = serializers.StringRelatedField(many=True) 
+    user_id = serializers.StringRelatedField() 
+    
     def validate_description(self, value):
         return strip_tags(value)
 
@@ -79,4 +81,4 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'description', 'status', 'created_at', 'last_updated']
+        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body', 'last_updated', 'created_at']
