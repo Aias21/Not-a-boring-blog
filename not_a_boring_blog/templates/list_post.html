@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Article List</title>
+</head>
+<body>
+    <h1 style="text-decoration: underline; color: darkred;">Article List</h1>
+    <ul>
+        {% for article in articles %}
+            <li>
+                <h2 style="border-bottom: 1px dotted; color: green;">{{ article.title }}</h2>
+                <p><em><b>Author:</b></em> {{ article.user_id }}</p>
+                <p><em><b>Category:</b></em> 
+                    <!--{{ article.category }}-->
+                    {% for cat in article.category.all %}
+                        {{ cat.category_name }}
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <p><em><b>Status:</b></em> {{ article.status }}</p>
+                <p><em><b>Time to read:</b></em> {{ article.min_read }} min</p>
+                <p><em><b>Description:</b></em> {{ article.description}}</p>
+                <p>&nbsp;</p>
+                <p>{{ article.body }}</p>
+                <p>&nbsp;</p>
+                <p><em><b>Published on:</b></em> {{ article.created_at }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -26,18 +26,18 @@ class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
 
-# class ArticleListView(View):
-#     def get(self, request):
-#         articles = Post.objects.all()
-#         template = loader.get_template('not_a_boring_blog/html/list_post.html')  # Corrected template path
-#         context = {'articles': articles}
-#         return HttpResponse(template.render(context, request))
-
-
 class ArticleListView(View):
-    template_name = 'list_post.html'  # Specify the template path
-
     def get(self, request):
         articles = Post.objects.all()
+        template = loader.get_template('list_post.html')
         context = {'articles': articles}
-        return render(request, self.template_name, context)
+        return HttpResponse(template.render(context, request))
+
+
+# class ArticleListView(View):
+#     template_name = 'list_post.html'  # Specify the template path
+
+#     def get(self, request):
+#         articles = Post.objects.all()
+#         context = {'articles': articles}
+#         return render(request, self.template_name, context)
