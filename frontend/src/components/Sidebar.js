@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 
 function Sidebar(props) {
-  const { archives, description, social, title } = props;
+  const { description, social, title } = props;
 
   return (
     <Grid item xs={12} md={4}>
