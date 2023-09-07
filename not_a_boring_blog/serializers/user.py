@@ -90,19 +90,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class LoginUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=255)
-    password = serializers.CharField(write_only=True, required=True, style={'input_style': 'password'})
-    role = RoleSerializer(read_only=True)
+    password = serializers.CharField(required=True)
+    role = RoleSerializer(required=False, read_only=True)
 
     class Meta:
         model = User
         fields = ['username',  'password', 'role']
-
-    def to_representation(self, instance):
-        # Remove the 'role' field for false values
-        data = super().to_representation(instance)
-        print(data)
-        role_data = data.get('role')
-        print(role_data)
-        if role_data and not any(role_data.values()):
-            data.pop('role')
-        return data
