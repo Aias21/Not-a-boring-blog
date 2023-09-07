@@ -27,7 +27,6 @@ class RegisterUser(APIView):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            Token.objects.create(user=user)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
@@ -62,9 +61,27 @@ class LoginUser(APIView):
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.data.get("username").lower()
+            try:
+                user_exists = User.objects.get(username=username)
+            except User.DoesNotExist:
+                return Response({"detail": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
             user = authenticate(username=username, password=password)
             if user is not None:
-                token = Token.objects.get(user=user)
-                data = {"token": str(token), "username": username}
+                try:
+                    token = Token.objects.get(user=user)
+                except Token.DoesNotExist:
+                    token = Token.objects.create(user=user)
+                data = {
+                    "token": str(token),
+                    "username": username
+                }
                 return Response(data, status=200)
             return Response(serializer.errors)
+        return Response(serializer.errors)
+
+
+class LogoutUser(APIView):
+    def get(self, request, format=None):
+        # simply delete the token to force a logout
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)

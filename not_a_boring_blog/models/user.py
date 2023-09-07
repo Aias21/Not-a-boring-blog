@@ -8,9 +8,6 @@ class Role(models.Model):
     is_blogger = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     bio = models.CharField(max_length=500)
-    # created_at is by default defined in User model - will be updated later with serializer
-    # last_login is by default defined in User model - will be updated later with serializer
-    # email is by default defined in User model - will be updated later with serializer
 
     def __str__(self):
         return self.user.username
