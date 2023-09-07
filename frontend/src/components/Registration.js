@@ -112,6 +112,7 @@
 // export default Registration;
 
 import * as React from 'react';
+import { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -125,13 +126,14 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import axios from 'axios';
 
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
       {'Copyright © '}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        Not So Boring Blog
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -139,19 +141,62 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 export default function SignUp() {
-  const handleSubmit = (event) => {
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+
+// axios.defaults.xsrfCookieName = 'csrftoken';
+// axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+// axios.defaults.withCredentials = true;
+
+
+
+  const handleRegistration = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-  };
+    const registrationData = {
+      username: username,
+      email: email,
+      password: password,
+    };
+
+    try {
+      const registrationResponse = await axios.post("http://127.0.0.1:8000/api/register/", registrationData);
+      if (registrationResponse.status === 201) {
+        const loginData = {
+          email: registrationData.email,
+          password: registrationData.password
+        };
+        const loginResponse = await axios.post("http://127.0.0.1:8000/api/login/", loginData);
+        if (loginResponse.status === 200) {
+          console.log('OK 200')
+        }
+      }
+    } catch (error) {
+        if (error.response) {
+          // If the error has a response from the server, it's likely a validation error
+          const errorData = error.response.data;
+          
+          console.log(`validation error: ${error.response.data}`)
+          if (errorData.error === 'Email already exists') {
+            setError('Email already exists');
+          } else if (errorData.error === 'Username already exists') {
+            setError('Username already exists');
+          } else if (errorData.error === 'Password must have at least 8 characters and special characters.') {
+            setError('Password must have at least 8 characters and special characters.');
+          } else {
+            setError('An error occurred during registration.');
+          }
+        } else {
+          // If there's no response (e.g., network error), display a generic error message
+          setError('An error occurred during registration.');
+        }
+      }
+    }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -171,27 +216,19 @@ export default function SignUp() {
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Box component="form" noValidate onSubmit={handleRegistration} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
-                  autoComplete="given-name"
-                  name="firstName"
+                  autoComplete="username"
+                  name="username"
                   required
                   fullWidth
-                  id="firstName"
-                  label="First Name"
+                  id="username"
+                  label="Username"
                   autoFocus
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -202,6 +239,8 @@ export default function SignUp() {
                   label="Email Address"
                   name="email"
                   autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -213,12 +252,8 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
-                  label="I want to receive inspiration, marketing promotions and updates via email."
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </Grid>
             </Grid>
@@ -230,6 +265,7 @@ export default function SignUp() {
             >
               Sign Up
             </Button>
+            <p className="error">{error}</p>
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link href="/login" variant="body2">
