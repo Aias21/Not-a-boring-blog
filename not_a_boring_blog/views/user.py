@@ -57,10 +57,11 @@ class LoginUser(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        password = request.data.get('password')
+        # password = request.data.get('password')
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.data.get("username").lower()
+            password = serializer.data.get("password")
             try:
                 user_exists = User.objects.get(username=username)
             except User.DoesNotExist:
@@ -71,13 +72,23 @@ class LoginUser(APIView):
                     token = Token.objects.get(user=user)
                 except Token.DoesNotExist:
                     token = Token.objects.create(user=user)
+                try:
+                    role = Role.objects.get(user=user)
+                    role_serializer = RoleSerializer(role)
+                    true_roles = {}  # Dictionary key-value pairs of true roles
+                    for key, value in role_serializer.data.items():
+                        if value:
+                            true_roles[key] = value
+                except Role.DoesNotExist:
+                    true_roles = None
                 data = {
                     "token": str(token),
-                    "username": username
+                    "username": username,
+                    "role": true_roles
                 }
                 return Response(data, status=200)
             return Response(serializer.errors)
-        return Response(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutUser(APIView):
