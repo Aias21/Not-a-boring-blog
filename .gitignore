@@ -162,8 +162,5 @@ cython_debug/
 
 .vscode/settings.json
 
-
 */__pycache__/*
 */*/__pycache__/*
-
-list_post_view.py
