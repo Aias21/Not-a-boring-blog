@@ -95,7 +95,7 @@ class LoginUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username',  'password', 'role']
+        fields = ['username', 'password', 'role']
 
 
 class UpdateRoleSerializer(serializers.ModelSerializer):
