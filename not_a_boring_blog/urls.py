@@ -6,11 +6,13 @@ from .views.user import (
     UpdateUser,
     LoginUser,
     LogoutUser,
+    UpdateUserRole,
 )
 
 app_name = "not_a_boring_blog"
 urlpatterns = [
     path('home/', home, name='home'),
+    path('update_role/<int:id>/', UpdateUserRole.as_view(), name='update_role'),
     path('users_list/', UserList.as_view(), name='users_list'),
     path('register/', RegisterUser.as_view(), name='register'),
     path('update_user/<int:id>/', UpdateUser.as_view(), name='update_user'),

@@ -2,22 +2,51 @@ from rest_framework.views import APIView
 from ..models.user import Role
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
-from ..serializers.user import RoleSerializer, CustomUserSerializer, LoginUserSerializer
+from ..serializers.user import (
+    RoleSerializer,
+    CustomUserSerializer,
+    LoginUserSerializer,
+    UpdateRoleSerializer,
+)
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAdminUser,
+)
 from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password, check_password
 
 
 class UserList(APIView):
+    '''Returns the entire list of users on the platform'''
+
     # permission_classes = [AllowAny]
 
     def get(self, request):
         users = User.objects.all()
         serializer = CustomUserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdateUserRole(APIView):
+    '''Updating user role - only admin should be able to do this operation'''
+    permission_classes = [IsAdminUser]
+
+    def put(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        if request.user.is_staff:
+            serializer = UpdateRoleSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"details":"You do not have permission for this operation"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class RegisterUser(APIView):
