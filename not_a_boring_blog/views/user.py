@@ -18,7 +18,7 @@ from rest_framework.permissions import (
 from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password, check_password
-
+from rest_framework.exceptions import ValidationError
 
 class UserList(APIView):
     '''Returns the entire list of users on the platform'''
@@ -86,21 +86,21 @@ class LoginUser(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # password = request.data.get('password')
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.data.get("username").lower()
             password = serializer.data.get("password")
             try:
-                user_exists = User.objects.get(username=username)
+                if '@' in username:
+                    user_exists = User.objects.get(email=username)
+                    username = user_exists.username
+                else:
+                    user_exists = User.objects.get(username=username)
             except User.DoesNotExist:
                 return Response({"detail": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
             user = authenticate(username=username, password=password)
             if user is not None:
-                try:
-                    token = Token.objects.get(user=user)
-                except Token.DoesNotExist:
-                    token = Token.objects.create(user=user)
+                token, created = Token.objects.get_or_create(user=user)
                 try:
                     role = Role.objects.get(user=user)
                     role_serializer = RoleSerializer(role)
@@ -116,7 +116,8 @@ class LoginUser(APIView):
                     "role": true_roles
                 }
                 return Response(data, status=200)
-            return Response(serializer.errors)
+            else:
+                return Response({"detail": "Wrong credentials."}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
