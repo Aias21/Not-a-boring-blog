@@ -1,3 +1,4 @@
+# The above code defines two Django models, Category and Post, with various fields and relationships.
 from django.db import models
 from .user import Role
 
@@ -15,7 +16,7 @@ class Post(models.Model):
         ('private', 'Private'),
         ('editing', 'Editing'),
     ]
-    category = models.ManyToManyField(Category) # on_delete=models.CASCADE is not applied in ManyToMany
+    category = models.ManyToManyField(Category, related_name='posts') # on_delete=models.CASCADE is not applied in ManyToMany
     title = models.CharField(max_length=255)
     body = models.TextField()
     user_id = models.ForeignKey(Role, on_delete=models.CASCADE)
@@ -27,3 +28,15 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def update_categories(self, categories):
+        post_categories = self.category.all()
+        list_categories = [category.id for category in post_categories]
+        
+        for category in post_categories:
+            if category.id not in categories:
+                self.category.remove(category)
+        
+        for category in categories:
+            if category not in list_categories:
+                self.category.add(category)

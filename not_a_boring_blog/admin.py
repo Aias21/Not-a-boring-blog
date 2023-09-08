@@ -19,10 +19,13 @@ class PostAdmin(admin.ModelAdmin):
         return ", ".join([category.category_name for category in obj.category.all()])
     get_categories.short_description = 'Category'
 
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'category_name')
+
 
 admin.site.register(View)
 admin.site.register(Comment)
 admin.site.register(ReplyComment)
-admin.site.register(Category)
+admin.site.register(Category, CategoryAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.register(Post, PostAdmin)
