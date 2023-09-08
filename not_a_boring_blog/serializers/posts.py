@@ -3,27 +3,25 @@ from ..models.post import Category, Post
 from rest_framework.exceptions import ValidationError
 from datetime import date, datetime
 from django.utils.html import strip_tags
+from ..models.user import Role
+from django.contrib.auth.models import User
 
 
-# class CategorySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Category
-#         fields = '__all__'
-
-# class PostSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Post
-#         fields = '__all__'
-
-
-class UniqueTitleValidator:
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['category_name']
+        
+class UniqueBodyValidator:
     def __call__(self, value):
-        if Post.objects.filter(title=value).exists():
-            raise ValidationError(f'Post with title "{value}" already exists! Please choose another title')
+        if Post.objects.filter(body=value).exists():
+            raise ValidationError(f'Post with the same body already exists! Please choose another text')
 
 
 class DateValidator:
     def __call__(self, value):
+        print(type(value))
+        print(type(datetime.today()))
         if value > datetime.today():
             raise ValidationError(f'The date cannot be further than {datetime.today()}')
 
@@ -34,27 +32,17 @@ class DateField(serializers.ReadOnlyField):
     def to_internal_value(self, data):
         if isinstance(data, datetime):
             return data
-        # elif isinstance(data, date):
-        #     return data.date()
         else:
             raise serializers.ValidationError("Invalid date format.")
-        # if isinstance(data, datetime):
-        #     return data.date()
-        # return super().to_internal_value(data)
     
     def run_validation(self, data):
         value = self.to_internal_value(data)
         self.run_validators(value)
         return value
 
-# class Capitalize:
-#     def __call__(self, value):
-#         return value.title()
-
-
-
 
 class PostUpdateSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(many=True, read_only=True)
     class Meta:
         model = Post
         fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body',  'created_at', 'last_updated']
@@ -62,23 +50,33 @@ class PostUpdateSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     last_updated = serializers.DateTimeField(validators=[DateValidator()], required=False)
-    title = serializers.CharField(required=True, max_length=255, validators=[UniqueTitleValidator()])
+    title = serializers.CharField(required=True, max_length=255)
     created_at = serializers.DateTimeField(validators=[DateValidator()], required=False)
-    category = serializers.StringRelatedField(many=True) 
-    user_id = serializers.StringRelatedField() 
+    category = serializers.StringRelatedField(many=True)  # 
+    user_id = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all()) 
     
     def validate_description(self, value):
         return strip_tags(value)
 
-    # def to_representation(self, instance):
-    #     instance.title = Capitalize()(instance.title)
-    #     return super().to_representation(instance)
-
     def to_internal_value(self, data):
         if 'status' in data:
-            data['status'] = 'Published'
+            data['status'] = 'published'
             return super().to_internal_value(data)
 
     class Meta:
         model = Post
-        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body', 'last_updated', 'created_at']
+        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
+
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(max_length=255)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
+    user_id = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all())
+    body = serializers.CharField(validators=[UniqueBodyValidator()])  # Add UniqueBodyValidator here
+    class Meta:
+        model = Post
+        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body']
+
+    def validate_description(self, value):
+        return strip_tags(value)
+
