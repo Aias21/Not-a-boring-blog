@@ -2,7 +2,7 @@ from rest_framework import serializers
 from ..models.user import Role
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
-
+from django.contrib.auth.hashers import make_password
 
 class UniqueUsernameValidator:
     def __call__(self, value):
@@ -50,7 +50,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             username=validated_data['username'].lower(),
             email=validated_data['email'].lower(),
-            password=validated_data['password']
+            password=make_password(validated_data['password'])
         )
         Role.objects.create(user=user, **role_data)  # Create a Role instance associated with the user
         return user
@@ -78,9 +78,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
                 pass  # No conflicts found, continue updating
 
         # Update role fields
-        role_instance.is_moderator = role_data.get('is_moderator', role_instance.is_moderator)
-        role_instance.is_blogger = role_data.get('is_blogger', role_instance.is_blogger)
-        role_instance.is_admin = role_data.get('is_admin', role_instance.is_admin)
+        # role_instance.is_moderator = role_data.get('is_moderator', role_instance.is_moderator)
+        # role_instance.is_blogger = role_data.get('is_blogger', role_instance.is_blogger)
+        # role_instance.is_admin = role_data.get('is_admin', role_instance.is_admin)
         role_instance.bio = role_data.get('bio', role_instance.bio)
 
         instance.save()
@@ -90,8 +90,29 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class LoginUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=255)
-    password = serializers.CharField(write_only=True, required=True, style={'input_style': 'password'})
+    password = serializers.CharField(required=True)
+    role = RoleSerializer(required=False, read_only=True)
 
     class Meta:
         model = User
-        fields = ['username',  'password']
+        fields = ['username', 'password', 'role']
+
+
+class UpdateRoleSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(default={'is_blogger': True})
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'role']
+
+    def update(self, instance, validated_data):
+        role_data = validated_data.pop('role', {})  # Extract role data
+        role_instance, created = Role.objects.get_or_create(user=instance, defaults={'is_blogger': True})
+
+        # Update role fields
+        role_instance.is_moderator = role_data.get('is_moderator', role_instance.is_moderator)
+        role_instance.is_blogger = role_data.get('is_blogger', role_instance.is_blogger)
+        role_instance.is_admin = role_data.get('is_admin', role_instance.is_admin)
+        instance.save()
+        role_instance.save()
+        return instance

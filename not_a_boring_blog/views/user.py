@@ -2,22 +2,51 @@ from rest_framework.views import APIView
 from ..models.user import Role
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
-from ..serializers.user import RoleSerializer, CustomUserSerializer, LoginUserSerializer
+from ..serializers.user import (
+    RoleSerializer,
+    CustomUserSerializer,
+    LoginUserSerializer,
+    UpdateRoleSerializer,
+)
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAdminUser,
+)
 from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password, check_password
-
+from rest_framework.exceptions import ValidationError
 
 class UserList(APIView):
+    '''Returns the entire list of users on the platform'''
+
     # permission_classes = [AllowAny]
 
     def get(self, request):
         users = User.objects.all()
         serializer = CustomUserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdateUserRole(APIView):
+    '''Updating user role - only admin should be able to do this operation'''
+    permission_classes = [IsAdminUser]
+
+    def put(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        if request.user.is_staff:
+            serializer = UpdateRoleSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"details":"You do not have permission for this operation"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class RegisterUser(APIView):
@@ -27,7 +56,6 @@ class RegisterUser(APIView):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            Token.objects.create(user=user)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
@@ -58,13 +86,43 @@ class LoginUser(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        password = request.data.get('password')
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.data.get("username").lower()
+            password = serializer.data.get("password")
+            try:
+                if '@' in username:
+                    user_exists = User.objects.get(email=username)
+                    username = user_exists.username
+                else:
+                    user_exists = User.objects.get(username=username)
+            except User.DoesNotExist:
+                return Response({"detail": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
             user = authenticate(username=username, password=password)
             if user is not None:
-                token = Token.objects.get(user=user)
-                data = {"token": str(token), "username": username}
+                token, created = Token.objects.get_or_create(user=user)
+                try:
+                    role = Role.objects.get(user=user)
+                    role_serializer = RoleSerializer(role)
+                    true_roles = {}  # Dictionary key-value pairs of true roles
+                    for key, value in role_serializer.data.items():
+                        if value:
+                            true_roles[key] = value
+                except Role.DoesNotExist:
+                    true_roles = None
+                data = {
+                    "token": str(token),
+                    "username": username,
+                    "role": true_roles
+                }
                 return Response(data, status=200)
-            return Response(serializer.errors)
+            else:
+                return Response({"detail": "Wrong credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutUser(APIView):
+    def get(self, request, format=None):
+        # simply delete the token to force a logout
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
