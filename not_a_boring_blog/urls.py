@@ -1,5 +1,6 @@
 from django.urls import path, include
 from .views.views import home
+from .views.view import record_post_view
 from .views.post import PostList, PostDetail, PostCreate
 from .views.user import (
     UserList,
@@ -23,7 +24,9 @@ urlpatterns = [
     path('update_role/<int:id>/', UpdateUserRole.as_view(), name='update_role'),
     path('users_list/', UserList.as_view(), name='users_list'),
     path('register/', RegisterUser.as_view(), name='register'),
-    path('update_user/<int:id>/', UpdateUser.as_view(), name='update_user'),
+    path('update_user/<int:id>/', UpdateUser.as_view(), name='update_user'), 
     path('login/', LoginUser.as_view(), name='login'),
     path('logout/', LogoutUser.as_view(), name='logout'),
-]
+
+    # post views
+    path('record_post_view/<int:post_id>/', record_post_view, name='record_post_view'),
