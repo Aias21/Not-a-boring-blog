@@ -1,7 +1,12 @@
 from django.urls import path, include
 from .views.views import home
 from .views.view import record_post_view
-from .views.post import PostList, PostDetail, PostCreate, GetPublicPosts
+from .views.post import (
+    PostList, 
+    PostDetail, 
+    PostCreate, 
+    GetPublicPosts, 
+    OnlyUserPostsView)
 from .views.user import (
     UserList,
     RegisterUser,
@@ -20,6 +25,8 @@ urlpatterns = [
     path('post_detail/<int:pk>/', PostDetail.as_view(), name='post-detail'),
     path('post_create/', PostCreate.as_view(), name='post-create'),
     path('public_posts/', GetPublicPosts.as_view(), name='get-public-posts'),
+    path('user_posts/', OnlyUserPostsView.as_view(), name='only-user-posts'),
+    
 
     # user endpoints
     path('update_role/<int:id>/', UpdateUserRole.as_view(), name='update_role'),

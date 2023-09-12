@@ -3,9 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models.post import Post
 from ..serializers.posts import PostSerializer, PostCreateSerializer, PostUpdateSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from ..permissions import IsOwnerOrReadOnly
+from ..models.user import Role
+
 
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
@@ -82,3 +84,21 @@ class GetPublicPosts(APIView):
         serializer = PostSerializer(public_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class OnlyUserPostsView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        try:
+            role = Role.objects.get(user=user)
+        except Role.DoesNotExist:
+            role = None
+        
+        if role:
+            posts = Post.objects.filter(user_id=role)
+            serializer = PostSerializer(posts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK) # or status=200
+        else:
+            return Response({"detail": "Role is not found for this user"}, status=status.HTTP_400_BAD_REQUEST)
