@@ -73,3 +73,12 @@ class PostDetail(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+class GetPublicPosts(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        public_posts = Post.objects.filter(status='published')
+        serializer = PostSerializer(public_posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
