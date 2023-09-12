@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models.post import Post
 from ..serializers.posts import PostSerializer, PostCreateSerializer, PostUpdateSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.authentication import TokenAuthentication
 from ..permissions import IsOwnerOrReadOnly
 from ..models.user import Role
@@ -76,8 +76,7 @@ class PostDetail(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 class GetPublicPosts(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         public_posts = Post.objects.filter(status='published')
@@ -86,9 +85,6 @@ class GetPublicPosts(APIView):
 
 
 class OnlyUserPostsView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
     def get(self, request):
         user = request.user
         try:
