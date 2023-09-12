@@ -1,12 +1,13 @@
 from rest_framework.views import APIView
-from ..models.user import Role
+from not_a_boring_blog.models.user import Role
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
-from ..serializers.user import (
+from not_a_boring_blog.serializers.user import (
     RoleSerializer,
     CustomUserSerializer,
     LoginUserSerializer,
     UpdateRoleSerializer,
+    ChangePasswordSerializer,
 )
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -19,6 +20,10 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.exceptions import ValidationError
+from rest_framework.decorators import permission_classes, api_view
+from django.contrib.auth import update_session_auth_hash
+from django.db.models import Q
+
 
 class UserList(APIView):
     '''Returns the entire list of users on the platform'''
@@ -70,15 +75,27 @@ class UpdateUser(APIView):
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
         # Check if updated user is the same as the authenticated user
         if request.user != user:
-            return Response({"detail": "Permission denied"},status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            new_password = request.data.get("password")
-            if new_password:
-                user.set_password(new_password)
-                user.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    if request.method == 'POST':
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            if user.check_password(serializer.data.get('current_password')):
+                user.set_password(serializer.data.get('new_password'))
+                user.save()
+                update_session_auth_hash(request, user)  # To update session after password change
+                return Response({'message': 'Password changed successfully.'}, status=status.HTTP_200_OK)
+            return Response({'error': 'Incorrect old password.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -89,19 +106,21 @@ class LoginUser(APIView):
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
             if serializer.data.get("username") or serializer.data.get("email"):
+                username = ''
+                email = ''
                 if serializer.data.get("username"):
                     username = serializer.data.get("username").lower()
                 if serializer.data.get("email"):
-                    username = serializer.data.get("email").lower()
+                    email = serializer.data.get("email").lower()
                 try:
-                    user_exists = User.objects.get(email=username)
-                    username = user_exists.username
+                    user_exists = User.objects.filter(
+                        Q(username=username) | Q(email=email)).first()
                 except User.DoesNotExist:
                     return Response({"detail": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
             else:
                 return Response({"detail": "You need to provide username or email in order to log in!"})
             password = serializer.data.get("password")
-            user = authenticate(username=username, password=password)
+            user = authenticate(username=user_exists, password=password)
             if user is not None:
                 token, created = Token.objects.get_or_create(user=user)
                 try:
@@ -115,7 +134,7 @@ class LoginUser(APIView):
                     true_roles = None
                 data = {
                     "token": str(token),
-                    "username": username,
+                    "username": str(user_exists),
                     "role": true_roles
                 }
                 return Response(data, status=200)

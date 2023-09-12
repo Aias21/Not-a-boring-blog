@@ -1,19 +1,18 @@
-from django.urls import path, include
-from .views.views import home
+from django.urls import path
 from .views.view import record_post_view
 from .views.post import PostList, PostDetail, PostCreate
-from .views.user import (
+from not_a_boring_blog.views.user import (
     UserList,
     RegisterUser,
     UpdateUser,
     LoginUser,
     LogoutUser,
     UpdateUserRole,
+    change_password
 )
 
 app_name = "not_a_boring_blog"
 urlpatterns = [
-    path('home/', home, name='home'),
   
     # post endpoints
     path('post_list/', PostList.as_view(), name='post-list'),
@@ -21,6 +20,7 @@ urlpatterns = [
     path('post_create/', PostCreate.as_view(), name='post-create'),
   
     # user endpoints
+    path('change_password/', change_password, name='change_password'),
     path('update_role/<int:id>/', UpdateUserRole.as_view(), name='update_role'),
     path('users_list/', UserList.as_view(), name='users_list'),
     path('register/', RegisterUser.as_view(), name='register'),
@@ -30,3 +30,4 @@ urlpatterns = [
 
     # post views
     path('record_post_view/<int:post_id>/', record_post_view, name='record_post_view'),
+]
