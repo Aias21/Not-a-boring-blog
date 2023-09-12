@@ -88,16 +88,19 @@ class LoginUser(APIView):
     def post(self, request):
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
-            username = serializer.data.get("username").lower()
-            password = serializer.data.get("password")
-            try:
-                if '@' in username:
+            if serializer.data.get("username") or serializer.data.get("email"):
+                if serializer.data.get("username"):
+                    username = serializer.data.get("username").lower()
+                if serializer.data.get("email"):
+                    username = serializer.data.get("email").lower()
+                try:
                     user_exists = User.objects.get(email=username)
                     username = user_exists.username
-                else:
-                    user_exists = User.objects.get(username=username)
-            except User.DoesNotExist:
-                return Response({"detail": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+                except User.DoesNotExist:
+                    return Response({"detail": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response({"detail": "You need to provide username or email in order to log in!"})
+            password = serializer.data.get("password")
             user = authenticate(username=username, password=password)
             if user is not None:
                 token, created = Token.objects.get_or_create(user=user)
