@@ -89,13 +89,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class LoginUserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=255)
+    username = serializers.CharField(max_length=255, allow_blank=True, required=False)
+    email = serializers.CharField(max_length=255, allow_blank=True, required=False)
     password = serializers.CharField(required=True)
     role = RoleSerializer(required=False, read_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'role']
+        fields = ['username', 'email', 'password', 'role']
 
 
 class UpdateRoleSerializer(serializers.ModelSerializer):
