@@ -20,7 +20,7 @@ def record_post_view(request, post_id):
 
     last_view = View.objects.filter(post_id=post.id, user_id=user.id).order_by('-timestamp').first()
    
-    if not last_view or (datetime.now(timezone.utc) - last_view.timestamp) > COOLDOWN_PERIOD:
+    if not last_view or (datetime.now(timezone.utc) - last_view.timestamp) > cooldown_period:
         role = get_object_or_404(Role, id=user.id)
         View.objects.create(post_id=post, user_id=role)
 
