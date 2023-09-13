@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views.view import record_post_view
 from .views.post import (
     PostList, 
@@ -15,6 +15,13 @@ from .views.user import (
     UpdateUserRole,
     change_password
 )
+from .views.comment import CommentList
+# from rest_framework.routers import DefaultRouter
+
+
+# router = DefaultRouter()
+# router.register(r'', CommentViewSet)
+
 
 app_name = "not_a_boring_blog"
 urlpatterns = [
@@ -26,6 +33,9 @@ urlpatterns = [
     path('public_posts/', GetPublicPosts.as_view(), name='get-public-posts'),
     path('user_posts/', OnlyUserPostsView.as_view(), name='only-user-posts'),
     
+    #comments
+    # path('post_comments/', include(router.urls)),
+    path('comments/<int:post_id>/', CommentList.as_view(), name='comments'),
 
     # user endpoints
     path('change_password/', change_password, name='change_password'),
