@@ -1,5 +1,5 @@
 from django.urls import path
-from .views.view import record_post_view
+from .views.view import record_post_view, get_post_view_count
 from .views.post import (
     PostList, 
     PostDetail, 
@@ -38,4 +38,5 @@ urlpatterns = [
 
     # post views
     path('record_post_view/<int:post_id>/', record_post_view, name='record_post_view'),
+    path('<int:post_id>/view_count/', get_post_view_count, name='get_post_view_count')
 ]
