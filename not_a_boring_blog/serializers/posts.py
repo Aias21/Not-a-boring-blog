@@ -79,4 +79,3 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     def validate_description(self, value):
         return strip_tags(value)
-
