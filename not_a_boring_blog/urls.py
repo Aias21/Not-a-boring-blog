@@ -15,12 +15,12 @@ from .views.user import (
     UpdateUserRole,
     change_password
 )
-from .views.comment import CommentList
-# from rest_framework.routers import DefaultRouter
-
-
-# router = DefaultRouter()
-# router.register(r'', CommentViewSet)
+from .views.comment import (
+    PostCommentList,
+    CreateComment,
+    UpdateComment,
+    CreateReply,
+)
 
 
 app_name = "not_a_boring_blog"
@@ -34,8 +34,12 @@ urlpatterns = [
     path('user_posts/', OnlyUserPostsView.as_view(), name='only-user-posts'),
     
     #comments
-    # path('post_comments/', include(router.urls)),
-    path('comments/<int:post_id>/', CommentList.as_view(), name='comments'),
+    path('<int:post_id>/comments/', PostCommentList.as_view(), name='comments'),
+    path('<int:post_id>/create_comment/', CreateComment.as_view(), name='create_comment'),
+    path('<int:comment_id>/create_reply/', CreateReply.as_view(), name='create_reply'),
+    path('<int:comment_id>/update_comment/', UpdateComment.as_view(), name='update_comment'),
+    # ^ updates or deletes depending on the request method, works with comments as well as replies
+
 
     # user endpoints
     path('change_password/', change_password, name='change_password'),
