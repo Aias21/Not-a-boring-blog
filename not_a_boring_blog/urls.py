@@ -25,7 +25,7 @@ urlpatterns = [
     path('post_detail/<int:pk>/', PostDetail.as_view(), name='post-detail'),
     path('post_create/', PostCreate.as_view(), name='post-create'),
     path('public_posts/', GetPublicPosts.as_view(), name='get-public-posts'),
-    path('user_posts/', OnlyUserPostsView.as_view(), name='only-user-posts'),
+    path('user_posts/<str:username>/', OnlyUserPostsView.as_view(), name='only-user-posts'),
     
 
     # user endpoints
