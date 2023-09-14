@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views.view import record_post_view, get_post_view_count
 from .views.post import (
     PostList, 
@@ -15,6 +15,13 @@ from .views.user import (
     UpdateUserRole,
     change_password
 )
+from .views.comment import (
+    PostCommentList,
+    CreateComment,
+    UpdateComment,
+    CreateReply,
+)
+
 
 app_name = "not_a_boring_blog"
 urlpatterns = [
@@ -26,6 +33,13 @@ urlpatterns = [
     path('public_posts/', GetPublicPosts.as_view(), name='get-public-posts'),
     path('user_posts/', OnlyUserPostsView.as_view(), name='only-user-posts'),
     
+    #comments
+    path('<int:post_id>/comments/', PostCommentList.as_view(), name='comments'),
+    path('<int:post_id>/create_comment/', CreateComment.as_view(), name='create_comment'),
+    path('<int:comment_id>/create_reply/', CreateReply.as_view(), name='create_reply'),
+    path('<int:comment_id>/update_comment/', UpdateComment.as_view(), name='update_comment'),
+    # ^ updates or deletes depending on the request method, works with comments as well as replies
+
 
     # user endpoints
     path('change_password/', change_password, name='change_password'),
