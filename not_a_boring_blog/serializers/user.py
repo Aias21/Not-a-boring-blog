@@ -22,7 +22,6 @@ class RoleSerializer(serializers.ModelSerializer):
         # Ensure that only one of the three boolean values is True
         if sum([is_moderator, is_blogger, is_admin]) != 1:
             raise serializers.ValidationError("Only one attribute can be True at a time!")
-
         return data
 
 

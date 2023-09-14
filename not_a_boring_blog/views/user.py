@@ -26,7 +26,7 @@ from django.db.models import Q
 
 
 class UserList(APIView):
-    '''Returns the entire list of users on the platform'''
+    '''Returns the entire list of users on the platform - for Admin use'''
 
     # permission_classes = [AllowAny]
 
@@ -55,7 +55,8 @@ class UpdateUserRole(APIView):
 
 
 class RegisterUser(APIView):
-    permission_classes = [AllowAny] #  allow any user to register
+    '''User registration, all users should be allowed to register'''
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = CustomUserSerializer(data=request.data)
@@ -77,7 +78,8 @@ class RegisterUser(APIView):
 
 
 class UpdateUser(APIView):
-    authentication_classes = [TokenAuthentication]
+    '''Used to update user information, username, email and bio'''
+    authentication_classes = [IsAuthenticated]
 
     def put(self, request, id):
         try:
@@ -97,6 +99,7 @@ class UpdateUser(APIView):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_password(request):
+    '''This method is used by the user to change password'''
     if request.method == 'POST':
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -111,6 +114,7 @@ def change_password(request):
 
 
 class LoginUser(APIView):
+    '''User login, token is created'''
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -155,6 +159,7 @@ class LoginUser(APIView):
 
 
 class LogoutUser(APIView):
+    '''Logout user - token is destroyed'''
     def get(self, request, format=None):
         # simply delete the token to force a logout
         request.user.auth_token.delete()
