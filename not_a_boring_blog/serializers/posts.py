@@ -65,7 +65,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
+        fields = ['id', 'title', 'user_id', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
@@ -79,3 +79,18 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     def validate_description(self, value):
         return strip_tags(value)
+
+
+class PostTitleSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField(many=True)  # Use StringRelatedField for category
+
+    class Meta:
+        model = Post
+        fields = ['title', 'user_id', 'min_read', 'category', 'description', 'created_at']
+
+
+class OnlyUserPostSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField(many=True)  # Use CategorySerializer for the category field
+    class Meta:
+        model = Post
+        fields = ['id', 'title', 'user_id', 'category', 'status', 'min_read', 'description', 'created_at', 'last_updated']

@@ -2,23 +2,23 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from ..models.post import Post
-from ..serializers.posts import PostSerializer, PostCreateSerializer, PostUpdateSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
-from rest_framework.authentication import TokenAuthentication
+from ..serializers.posts import (
+    PostSerializer, 
+    PostCreateSerializer, 
+    PostUpdateSerializer, 
+    PostTitleSerializer, 
+    OnlyUserPostSerializer)
+from rest_framework.permissions import AllowAny, IsAdminUser
 from ..permissions import IsOwnerOrReadOnly
 from ..models.user import Role
-
-
-from rest_framework.decorators import api_view
-from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
-from rest_framework import permissions
+from rest_framework.generics import ListAPIView
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.decorators import permission_classes
 
 
 class PostList(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    '''Entire postlist, only admins can see the list'''
+    permission_classes = [IsAdminUser]
 
     def get(self, request):
         posts = Post.objects.all()
@@ -26,9 +26,7 @@ class PostList(APIView):
         return Response(serializer.data, status=200) # or status=200
 
 class PostCreate(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    
+    '''Post creation view'''
     def post(self, request):
         serializer = PostCreateSerializer(data=request.data)
         if serializer.is_valid():
@@ -38,8 +36,8 @@ class PostCreate(APIView):
 
 
 class PostDetail(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    '''Post Detail view for get, update, delete'''
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_post(self, pk):
         try:
@@ -50,7 +48,9 @@ class PostDetail(APIView):
     def get(self, request, pk):
         post = self.get_post(pk)
         if post:
-            serializer = PostSerializer(post)
+            if not IsOwnerOrReadOnly().has_object_permission(request, self, post):
+                return Response({"detail": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
+            serializer = PostSerializer(post)            
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -70,12 +70,13 @@ class PostDetail(APIView):
 
     def delete(self, request, pk):
         post = self.get_post(pk)
-        if post:
+        if post and post.user_id.user == request.user:
             post.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Deletion is done"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": "Permission denied"}, status=403)
 
 class GetPublicPosts(APIView):
+    '''You get only published  posts of every user'''
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -84,17 +85,36 @@ class GetPublicPosts(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class OnlyUserPostsView(APIView):
-    def get(self, request):
-        user = request.user
-        try:
-            role = Role.objects.get(user=user)
-        except Role.DoesNotExist:
-            role = None
-        
-        if role:
-            posts = Post.objects.filter(user_id=role)
-            serializer = PostSerializer(posts, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK) # or status=200
-        else:
-            return Response({"detail": "Role is not found for this user"}, status=status.HTTP_400_BAD_REQUEST)
+class GetUserPublicPosts(APIView):
+    '''You get only published  posts of a specific user'''
+
+    serializer_class = PostTitleSerializer
+    permission_classes = [AllowAny]
+
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        role = get_object_or_404(Role, user__username=username)
+        return Post.objects.filter(user_id=role, status='published')
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
+
+
+class GetUserPosts(ListAPIView):
+    '''The user can see only his/her own posts'''
+    serializer_class = OnlyUserPostSerializer
+    
+    def get_queryset(self):
+        user = self.request.user
+        role = user.role
+        queryset = Post.objects.filter(user_id=role)
+        get_list_or_404(queryset)
+        return queryset
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

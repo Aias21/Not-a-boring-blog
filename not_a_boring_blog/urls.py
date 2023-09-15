@@ -5,7 +5,9 @@ from .views.post import (
     PostDetail, 
     PostCreate, 
     GetPublicPosts, 
-    OnlyUserPostsView)
+    GetUserPublicPosts,
+    GetUserPosts
+    )
 from .views.user import (
     UserList,
     RegisterUser,
@@ -31,7 +33,8 @@ urlpatterns = [
     path('post_detail/<int:pk>/', PostDetail.as_view(), name='post-detail'),
     path('post_create/', PostCreate.as_view(), name='post-create'),
     path('public_posts/', GetPublicPosts.as_view(), name='get-public-posts'),
-    path('user_posts/', OnlyUserPostsView.as_view(), name='only-user-posts'),
+    path('user_posts/<str:username>/', GetUserPublicPosts.as_view(), name='only-user-posts'),
+    path('my_posts/', GetUserPosts.as_view(), name='my-posts'),
     
     #comments
     path('<int:post_id>/comments/', PostCommentList.as_view(), name='comments'),
