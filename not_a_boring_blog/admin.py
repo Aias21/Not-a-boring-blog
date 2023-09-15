@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models.comment import Comment, ReplyComment
+from .models.comment import Comment #, ReplyComment
 from .models.post import Post, Category
 from .models.user import Role
 from .models.views import View
@@ -25,7 +25,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 admin.site.register(View)
 admin.site.register(Comment)
-admin.site.register(ReplyComment)
+#admin.site.register(ReplyComment)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Role, RoleAdmin)
 admin.site.register(Post, PostAdmin)

@@ -3,17 +3,8 @@ from ..models.user import Role
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
-
-class UniqueUsernameValidator:
-    def __call__(self, value):
-        if User.objects.filter(username=value).exists():
-            raise ValidationError(f'Username already exists!')
-
-
-class UniqueEmailValidator:
-    def __call__(self, value):
-        if User.objects.filter(email=value).exists():
-            raise ValidationError(f'Email already exists!')
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import check_password
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -31,7 +22,6 @@ class RoleSerializer(serializers.ModelSerializer):
         # Ensure that only one of the three boolean values is True
         if sum([is_moderator, is_blogger, is_admin]) != 1:
             raise serializers.ValidationError("Only one attribute can be True at a time!")
-
         return data
 
 
@@ -39,7 +29,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=255)
     role = RoleSerializer(default={'is_blogger': True})  # Embed the RoleSerializer
     email = serializers.EmailField(required=True)
-    password = serializers.CharField( required=True, style={'input_style': 'password'})
+    password = serializers.CharField(required=True, style={'input_style': 'password'})
 
     class Meta:
         model = User
@@ -77,15 +67,25 @@ class CustomUserSerializer(serializers.ModelSerializer):
             except User.DoesNotExist:
                 pass  # No conflicts found, continue updating
 
-        # Update role fields
-        # role_instance.is_moderator = role_data.get('is_moderator', role_instance.is_moderator)
-        # role_instance.is_blogger = role_data.get('is_blogger', role_instance.is_blogger)
-        # role_instance.is_admin = role_data.get('is_admin', role_instance.is_admin)
         role_instance.bio = role_data.get('bio', role_instance.bio)
-
         instance.save()
         role_instance.save()
         return instance
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        # Check if the new password and confirmation match
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+
+        if new_password != confirm_password:
+            raise serializers.ValidationError("New password and confirmation do not match.")
+        return data
 
 
 class LoginUserSerializer(serializers.ModelSerializer):
@@ -100,6 +100,7 @@ class LoginUserSerializer(serializers.ModelSerializer):
 
 
 class UpdateRoleSerializer(serializers.ModelSerializer):
+    '''Serializes role updating'''
     role = RoleSerializer(default={'is_blogger': True})
 
     class Meta:
