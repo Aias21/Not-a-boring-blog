@@ -6,7 +6,7 @@ from ..serializers.posts import PostSerializer, PostCreateSerializer, PostUpdate
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.authentication import TokenAuthentication
 from ..permissions import IsOwnerOrReadOnly
-from ..models.user import Role
+from ..models.user import Role, User
 
 
 from rest_framework.decorators import api_view
