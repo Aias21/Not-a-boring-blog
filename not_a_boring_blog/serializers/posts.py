@@ -65,7 +65,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
+        fields = ['id', 'title', 'user_id', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
@@ -86,5 +86,11 @@ class PostTitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['title', 'min_read', 'user_id', 'category']
+        fields = ['title', 'user_id', 'min_read', 'category', 'description', 'created_at']
 
+
+class OnlyUserPostSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField(many=True)  # Use CategorySerializer for the category field
+    class Meta:
+        model = Post
+        fields = ['id', 'title', 'user_id', 'category', 'status', 'min_read', 'description', 'created_at', 'last_updated']
