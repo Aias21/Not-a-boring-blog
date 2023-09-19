@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from ..models.comment import Comment
 from ..serializers.comment import CommentSerializer, ReplyCommentSerializer
 from rest_framework.permissions import AllowAny
-from ..permissions import IsCommentAuthorOrReadOnly
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from ..models.post import Post

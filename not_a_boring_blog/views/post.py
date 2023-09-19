@@ -8,8 +8,8 @@ from ..serializers.posts import (
     PostUpdateSerializer, 
     PostTitleSerializer, 
     OnlyUserPostSerializer)
-from rest_framework.permissions import AllowAny, IsAdminUser
-from ..permissions import IsOwnerOrReadOnly
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from ..permissions import IsOwnerOrReadOnly, IsAdminRole, IsModeratorRole
 from ..models.user import Role
 from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404, get_list_or_404
@@ -17,8 +17,8 @@ from rest_framework.decorators import permission_classes
 
 
 class PostList(APIView):
-    '''Entire postlist, only admins can see the list'''
-    permission_classes = [IsAdminUser]
+    '''Entire post list, only admins can see the list'''
+    permission_classes = [IsAuthenticated, IsAdminRole, IsModeratorRole]
 
     def get(self, request):
         posts = Post.objects.all()
@@ -27,6 +27,7 @@ class PostList(APIView):
 
 class PostCreate(APIView):
     '''Post creation view'''
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         serializer = PostCreateSerializer(data=request.data)
         if serializer.is_valid():

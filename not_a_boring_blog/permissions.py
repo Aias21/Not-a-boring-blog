@@ -12,3 +12,13 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             if obj.user_id.user == request.user or obj.status == 'published':                
                 return True
         return False
+
+
+class IsAdminRole(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.role.is_admin
+
+
+class IsModeratorRole(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.role.is_moderator
