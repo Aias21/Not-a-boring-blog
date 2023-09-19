@@ -23,6 +23,6 @@ class Comment(models.Model):
     @property
     def is_parent(self):
         if self.parent_id is None:
-          return True
+            return True
         return False
 
