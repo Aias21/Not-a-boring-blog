@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from ..permissions import IsOwner
 from ..models.repost_request import RepostRequest, Post, User, Role
 from ..serializers.repost import (
     RepostSerializer,
@@ -11,12 +12,21 @@ from ..serializers.repost import (
 
 
 class CreateRepostRequest(APIView):
-    permission_classes = [IsAuthenticated]
-    # ToDo check that only one request is created per post
+    '''Creates Repost Request'''
     def post(self, request, post_id):
-        # Create a serializer instance without initializing it with request.data
-        serializer = RepostSerializer()
-        # Validate the serializer with the provided request data
+        # Check if the user has already created a repost request for the same post
+        existing_request = RepostRequest.objects.filter(
+            requester_id=request.user.id,
+            post_id=post_id,
+        ).first()
+
+        if existing_request:
+            return Response(
+                {"detail": "You have already created a repost request for this post."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create a serializer instance with the provided request data
         serializer_data = {
             **request.data,
             'requester_id': request.user.id,
@@ -26,15 +36,14 @@ class CreateRepostRequest(APIView):
 
         if serializer.is_valid():
             # Create the repost request
-            repost_request = serializer.save()
-
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RepostRequestedReceivedList(APIView):
-    permission_classes = [IsAuthenticated]
-
+    '''Returns requests to post author'''
     def get(self, request):
         # Get the authenticated user (post owner)
         user = self.request.user
@@ -46,8 +55,7 @@ class RepostRequestedReceivedList(APIView):
 
 
 class RepostRequestsSentList(APIView):
-    permission_classes = [IsAuthenticated]
-
+    '''Returns requests sent by user'''
     def get(self, request):
         user = self.request.user
         # Filter repost requests for requests owned by the user
@@ -58,16 +66,14 @@ class RepostRequestsSentList(APIView):
 
 
 class UpdateRepostRequestStatus(APIView):
+    '''Post author can update the status of a request by id, changing status to accepted or denied'''
     def put(self, request, request_id):
         # Get the authenticated user (post owner)
         user = self.request.user
 
         try:
             # Retrieve the repost request by request id and check if it belongs to the user
-            print('before')
-
             repost_request = RepostRequest.objects.get(id=request_id, post_id__user_id=user.id)
-            print('here')
         except RepostRequest.DoesNotExist:
             return Response({"detail": "Repost request not found for this user"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -88,15 +94,14 @@ class UpdateRepostRequestStatus(APIView):
 
 
 class DeleteRepostRequestView(APIView):
-    # ToDo
-    '''testing with postam i was able to delete another users request'''
+    '''Requester can delete a request by id'''
     def delete(self, request, request_id):
         # Get the authenticated user (post owner)
         user = self.request.user
 
         try:
             # Retrieve the repost request by request_id and check if it belongs to a post owned by the user
-            repost_request = RepostRequest.objects.get(id=request_id, post_id__user_id=user.id)
+            repost_request = RepostRequest.objects.get(id=request_id, requester_id=user.id)
         except RepostRequest.DoesNotExist:
             return Response({"detail": "Repost request not found"}, status=status.HTTP_404_NOT_FOUND)
 
