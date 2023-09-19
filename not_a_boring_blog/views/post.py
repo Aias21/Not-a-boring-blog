@@ -9,7 +9,7 @@ from ..serializers.posts import (
     PostTitleSerializer, 
     OnlyUserPostSerializer)
 from ..permissions import IsOwnerOrReadOnly, IsAdminRole, IsModeratorRole
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from ..models.user import Role, User
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.models import Token
