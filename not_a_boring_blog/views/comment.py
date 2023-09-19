@@ -25,6 +25,7 @@ class PostCommentList(APIView):
 
 class CreateComment(APIView):
     '''Create comment, only authenticated users can do it'''
+    serializer_class = ReplyCommentSerializer
     def post(self, request, post_id):
         try:
             post = Post.objects.get(pk=post_id)  # Retrieve the associated post
@@ -41,7 +42,7 @@ class CreateComment(APIView):
 class UpdateComment(APIView):
     '''Update/Delete comment, only authenticated users can do this that are also authors'''
     permission_classes = [IsAuthenticated]
-
+    serializer_class = ReplyCommentSerializer
     def get_comment(self, comment_id):
         try:
             return Comment.objects.get(pk=comment_id)
@@ -82,6 +83,7 @@ class UpdateComment(APIView):
 
 class CreateReply(APIView):
     '''Create reply, only authenticated users can do this'''
+    serializer_class = ReplyCommentSerializer
 
     def post(self, request, comment_id):
         try:

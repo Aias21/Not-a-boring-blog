@@ -70,12 +70,13 @@ class PostSerializer(serializers.ModelSerializer):
 
 class PostCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
+    description = serializers.CharField(max_length=500)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     body = serializers.CharField(validators=[UniqueBodyValidator()])  # Add UniqueBodyValidator here
+
     class Meta:
         model = Post
-        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body']
+        fields = ['title', 'category', 'status', 'min_read', 'description', 'body']
 
     def validate_description(self, value):
         return strip_tags(value)

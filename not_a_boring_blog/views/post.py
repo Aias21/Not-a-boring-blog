@@ -28,21 +28,24 @@ class PostList(APIView):
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data, status=200) # or status=200
 
-      
+
 class PostCreate(APIView):
     '''Post creation view'''
-    permission_classes = [IsAuthenticated]
+    serializer_class = PostCreateSerializer
+
     def post(self, request):
+        user_id = request.user.id  # Get the user_id from the request
         serializer = PostCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED) # or status=201
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) # or status=400
+            serializer.save(user_id_id=user_id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PostDetail(APIView):
     '''Post Detail view for get, update, delete'''
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+    serializer_class = PostUpdateSerializer
 
     def get_post(self, pk):
         try:
