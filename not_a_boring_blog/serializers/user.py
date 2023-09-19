@@ -45,32 +45,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
         Role.objects.create(user=user, **role_data)  # Create a Role instance associated with the user
         return user
 
-    def update(self, instance, validated_data):
-        role_data = validated_data.pop('role', {})  # Extract role data
-        role_instance = instance.role  # Get the existing role instance
 
-        # Update user fields
-        instance.username = validated_data.get('username', instance.username).lower()
-        instance.email = validated_data.get('email', instance.email).lower()
+class UpdateUserSerializer(serializers.ModelSerializer):
+    # Include the 'bio' field from the 'Role' model
+    bio = serializers.CharField(max_length=500, required=False, default="")
 
-        # If the username or email has changed, check for conflicts
-        if 'username' in validated_data or 'email' in validated_data:
-            try:
-                if 'username' in validated_data:
-                    existing_user = User.objects.get(username=validated_data['username'])
-                    if existing_user != instance:
-                        raise serializers.ValidationError("Username already exists.")
-                if 'email' in validated_data:
-                    existing_user = User.objects.get(email=validated_data['email'])
-                    if existing_user != instance:
-                        raise serializers.ValidationError("Email already exists.")
-            except User.DoesNotExist:
-                pass  # No conflicts found, continue updating
-
-        role_instance.bio = role_data.get('bio', role_instance.bio)
-        instance.save()
-        role_instance.save()
-        return instance
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'bio']
 
 
 class ChangePasswordSerializer(serializers.Serializer):

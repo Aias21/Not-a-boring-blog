@@ -8,6 +8,7 @@ from not_a_boring_blog.serializers.user import (
     LoginUserSerializer,
     UpdateRoleSerializer,
     ChangePasswordSerializer,
+    UpdateUserSerializer,
 )
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -19,8 +20,6 @@ from rest_framework.permissions import (
 from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password, check_password
-from rest_framework.exceptions import ValidationError
-from rest_framework.decorators import permission_classes, api_view
 from django.contrib.auth import update_session_auth_hash
 from django.db.models import Q
 
@@ -38,14 +37,15 @@ class UserList(APIView):
 
 class UpdateUserRole(APIView):
     '''Updating user role - only admin should be able to do this operation'''
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateRoleSerializer
 
-    def put(self, request, id):
+    def put(self, request, user_id):
         try:
-            user = User.objects.get(id=id)
+            user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-        if request.user.is_staff:
+        if request.user.role.is_admin:
             serializer = UpdateRoleSerializer(user, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -57,6 +57,7 @@ class UpdateUserRole(APIView):
 class RegisterUser(APIView):
     '''User registration, all users should be allowed to register'''
     permission_classes = [AllowAny]
+    serializer_class = CustomUserSerializer
 
     def post(self, request):
         serializer = CustomUserSerializer(data=request.data)
@@ -79,28 +80,37 @@ class RegisterUser(APIView):
 
 class UpdateUser(APIView):
     '''Used to update user information, username, email and bio'''
-    authentication_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateUserSerializer
 
-    def put(self, request, id):
+    def put(self, request):
         try:
-            user = User.objects.get(id=id)
+            user = User.objects.get(id=request.user.id)
+            role = Role.objects.get(user=user)  # Get the Role associated with the user
+            print(role)
         except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-        # Check if updated user is the same as the authenticated user
-        if request.user != user:
-            return Response({"detail": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
-        serializer = CustomUserSerializer(user, data=request.data, partial=True)
+        except Role.DoesNotExist:
+            return Response({"detail": "Role not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UpdateUserSerializer(user, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
+            # Update the 'bio' field in the associated Role model
+            if 'bio' in request.data:
+                role.bio = request.data['bio']
+                role.save()
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def change_password(request):
-    '''This method is used by the user to change password'''
-    if request.method == 'POST':
+class ChangeUserPassword(APIView):
+    serializer_class = ChangePasswordSerializer
+
+    def put(self, request):
+        '''This method is used by the user to change password'''
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
@@ -116,6 +126,7 @@ def change_password(request):
 class LoginUser(APIView):
     '''User login, token is created'''
     permission_classes = [AllowAny]
+    serializer_class = LoginUserSerializer
 
     def post(self, request):
         serializer = LoginUserSerializer(data=request.data)
@@ -162,5 +173,8 @@ class LogoutUser(APIView):
     '''Logout user - token is destroyed'''
     def get(self, request, format=None):
         # simply delete the token to force a logout
-        request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
+        try:
+            request.user.auth_token.delete()
+            return Response({"detail": f"Goodbye, {request.user}!"}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"detail": "You are not logged in!"}, status=status.HTTP_404_NOT_FOUND)
