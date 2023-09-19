@@ -23,6 +23,13 @@ from .views.comment import (
     UpdateComment,
     CreateReply,
 )
+from .views.repost import (
+    CreateRepostRequest,
+    RepostRequestedReceivedList,
+    RepostRequestsSentList,
+    UpdateRepostRequestStatus,
+    DeleteRepostRequestView,
+)
 
 
 app_name = "not_a_boring_blog"
@@ -43,7 +50,6 @@ urlpatterns = [
     path('<int:comment_id>/update_comment/', UpdateComment.as_view(), name='update_comment'),
     # ^ updates or deletes depending on the request method, works with comments as well as replies
 
-
     # user endpoints
     path('change_password/', change_password, name='change_password'),
     path('update_role/<int:id>/', UpdateUserRole.as_view(), name='update_role'),
@@ -52,6 +58,13 @@ urlpatterns = [
     path('update_user/<int:id>/', UpdateUser.as_view(), name='update_user'), 
     path('login/', LoginUser.as_view(), name='login'),
     path('logout/', LogoutUser.as_view(), name='logout'),
+
+    # repost request
+    path('<int:post_id>/request_repost/', CreateRepostRequest.as_view(), name='request_repost'),
+    path('requests_received/', RepostRequestedReceivedList.as_view(), name='requests_received'),
+    path('requests_sent/', RepostRequestsSentList.as_view(), name='requests_sent'),
+    path('<int:request_id>/update_request/', UpdateRepostRequestStatus.as_view(), name='request_update'),
+    path('<int:request_id>/delete_request/', DeleteRepostRequestView.as_view(), name='delete_repost_request'),
 
     # post views
     path('record_post_view/<int:post_id>/', record_post_view, name='record_post_view'),

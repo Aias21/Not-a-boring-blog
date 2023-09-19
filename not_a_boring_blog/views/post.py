@@ -10,7 +10,10 @@ from ..serializers.posts import (
     OnlyUserPostSerializer)
 from rest_framework.permissions import AllowAny, IsAdminUser
 from ..permissions import IsOwnerOrReadOnly
-from ..models.user import Role
+from ..models.user import Role, User
+from rest_framework.decorators import api_view
+from rest_framework.authtoken.models import Token
+from rest_framework import permissions
 from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.decorators import permission_classes
