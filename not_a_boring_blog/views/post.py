@@ -8,8 +8,8 @@ from ..serializers.posts import (
     PostUpdateSerializer, 
     PostTitleSerializer, 
     OnlyUserPostSerializer)
+from ..permissions import IsOwnerOrReadOnly, IsAdminRole, IsModeratorRole
 from rest_framework.permissions import AllowAny, IsAdminUser
-from ..permissions import IsOwnerOrReadOnly
 from ..models.user import Role, User
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.models import Token
@@ -20,16 +20,18 @@ from rest_framework.decorators import permission_classes
 
 
 class PostList(APIView):
-    '''Entire postlist, only admins can see the list'''
-    permission_classes = [IsAdminUser]
+    '''Entire post list, only admins can see the list'''
+    permission_classes = [IsAuthenticated, IsAdminRole, IsModeratorRole]
 
     def get(self, request):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data, status=200) # or status=200
 
+      
 class PostCreate(APIView):
     '''Post creation view'''
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         serializer = PostCreateSerializer(data=request.data)
         if serializer.is_valid():
@@ -78,6 +80,7 @@ class PostDetail(APIView):
             return Response({"detail": "Deletion is done"}, status=status.HTTP_204_NO_CONTENT)
         return Response({"detail": "Permission denied"}, status=403)
 
+      
 class GetPublicPosts(APIView):
     '''You get only published  posts of every user'''
     permission_classes = [AllowAny]
