@@ -3,8 +3,8 @@ from ..models.post import Category, Post
 from rest_framework.exceptions import ValidationError
 from datetime import date, datetime
 from django.utils.html import strip_tags
-from ..models.user import Role
-from django.contrib.auth.models import User
+from ..models.user import Role, User
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -53,7 +53,7 @@ class PostSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True, max_length=255)
     created_at = serializers.DateTimeField(validators=[DateValidator()], required=False)
     category = serializers.StringRelatedField(many=True)  # 
-    user_id = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all()) 
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     
     def validate_description(self, value):
         return strip_tags(value)
@@ -71,7 +71,7 @@ class PostSerializer(serializers.ModelSerializer):
 class PostCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all())
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     body = serializers.CharField(validators=[UniqueBodyValidator()])  # Add UniqueBodyValidator here
     class Meta:
         model = Post
