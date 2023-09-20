@@ -20,8 +20,12 @@ from rest_framework.decorators import permission_classes
 
 
 class PostList(APIView):
-    '''Entire post list, only admins can see the list'''
-    permission_classes = [IsAuthenticated, IsAdminRole, IsModeratorRole]
+    '''Entire post list, only moderators can see the list'''
+
+    '''
+    To test API you need to use the toke
+    '''
+    permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
 
     def get(self, request):
         posts = Post.objects.all()
@@ -78,10 +82,10 @@ class PostDetail(APIView):
 
     def delete(self, request, pk):
         post = self.get_post(pk)
-        if post and post.user_id.user == request.user:
+        if post and post.user_id == request.user:
             post.delete()
             return Response({"detail": "Deletion is done"}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"detail": "Permission denied"}, status=403)
+        return Response({"detail": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
 
       
 class GetPublicPosts(APIView):
@@ -103,11 +107,13 @@ class GetUserPublicPosts(APIView):
 
     def get_queryset(self):
         username = self.kwargs['username']
-        role = get_object_or_404(Role, user__username=username)
+        role = get_object_or_404(User, username=username)
         return Post.objects.filter(user_id=role, status='published')
     
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        if not queryset:
+            return Response({"detail" : f"{self.kwargs['username']} has no posts"}, status.HTTP_200_OK)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -118,8 +124,7 @@ class GetUserPosts(ListAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        role = user.role
-        queryset = Post.objects.filter(user_id=role)
+        queryset = Post.objects.filter(user_id=user)
         get_list_or_404(queryset)
         return queryset
     

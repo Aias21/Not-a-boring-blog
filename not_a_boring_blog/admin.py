@@ -28,8 +28,13 @@ class CategoryAdmin(admin.ModelAdmin):
 class RepostRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'requester_id', 'post_id', 'status', 'created_at')
 
+
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'author', 'created_at', 'parent_id')
+
+
 admin.site.register(View)
-admin.site.register(Comment)
+admin.site.register(Comment, CommentAdmin)
 admin.site.register(RepostRequest, RepostRequestAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Role, RoleAdmin)

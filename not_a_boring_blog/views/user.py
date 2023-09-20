@@ -40,9 +40,9 @@ class UpdateUserRole(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateRoleSerializer
 
-    def put(self, request, user_id):
+    def put(self, request, username):
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(username=username)
         except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
         if request.user.role.is_admin:

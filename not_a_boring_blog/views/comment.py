@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from ..models.comment import Comment
 from ..serializers.comment import CommentSerializer, ReplyCommentSerializer
 from rest_framework.permissions import AllowAny
-from ..permissions import IsOwner
+from ..permissions import IsOwnerOrReadOnly
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from ..models.post import Post
@@ -18,6 +18,7 @@ class PostCommentList(APIView):
         try:
             comments = Comment.objects.filter(post_id=post_id, parent_id=None)  # Retrieve top-level comments (not replies)
             serializer = CommentSerializer(comments, many=True, context={'request': request})
+
         except Comment.DoesNotExist:
             return Response({"detail": "Comments not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -41,8 +42,9 @@ class CreateComment(APIView):
 
 class UpdateComment(APIView):
     '''Update/Delete comment, only authenticated users can do this that are also authors'''
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
     serializer_class = ReplyCommentSerializer
+
     def get_comment(self, comment_id):
         try:
             return Comment.objects.get(pk=comment_id)
@@ -88,7 +90,7 @@ class CreateReply(APIView):
     def post(self, request, comment_id):
         try:
             comment = Comment.objects.get(pk=comment_id)  # Retrieve the associated post
-        except Post.DoesNotExist:
+        except Comment.DoesNotExist:
             return Response({"detail": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = ReplyCommentSerializer(data=request.data)
         if serializer.is_valid():

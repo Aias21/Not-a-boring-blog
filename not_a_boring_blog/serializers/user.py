@@ -83,11 +83,15 @@ class LoginUserSerializer(serializers.ModelSerializer):
 
 class UpdateRoleSerializer(serializers.ModelSerializer):
     '''Serializes role updating'''
-    role = RoleSerializer(default={'is_blogger': True})
+    role = RoleSerializer(default={
+        'is_blogger': True,
+        'is_moderator': False,
+        'is_admin': False
+    })
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'role']
+        fields = ['role']
 
     def update(self, instance, validated_data):
         role_data = validated_data.pop('role', {})  # Extract role data

@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views.view import record_post_view, get_post_view_count
+from .views.view import create_post_view, get_post_views
 from .views.post import (
     PostList, 
     PostDetail, 
@@ -30,14 +30,18 @@ from .views.repost import (
     UpdateRepostRequestStatus,
     DeleteRepostRequestView,
 )
-from .views.category import CreateCategory
+from .views.category import (
+    CreateCategory,
+    ListCategories,
+)
 
 
 app_name = "not_a_boring_blog"
 urlpatterns = [
 
     # categories
-    path('create_category', CreateCategory.as_view(), name='create-category'),
+    path('create_category/', CreateCategory.as_view(), name='create_category'),
+    path('list_categories/', ListCategories.as_view(), name='list_categories'),
 
     # post endpoints
     path('post_list/', PostList.as_view(), name='post-list'),
@@ -56,7 +60,7 @@ urlpatterns = [
 
     # user endpoints
     path('change_password/', ChangeUserPassword.as_view(), name='change_password'),
-    path('update_role/<int:user_id>/', UpdateUserRole.as_view(), name='update_role'),
+    path('update_role/<str:username>/', UpdateUserRole.as_view(), name='update_role'),
     path('users_list/', UserList.as_view(), name='users_list'),
     path('register/', RegisterUser.as_view(), name='register'),
     path('update_user/', UpdateUser.as_view(), name='update_user'),
@@ -71,7 +75,7 @@ urlpatterns = [
     path('<int:request_id>/delete_request/', DeleteRepostRequestView.as_view(), name='delete_repost_request'),
 
     # post views
-    path('record_post_view/<int:post_id>/', record_post_view, name='record_post_view'),
-    path('<int:post_id>/view_count/', get_post_view_count, name='get_post_view_count'),
+    path('<int:post_id>/create_post_view/', create_post_view, name='create_post_view'),
+    path('<int:post_id>/view_count/', get_post_views, name='post_views'),
 
 ]

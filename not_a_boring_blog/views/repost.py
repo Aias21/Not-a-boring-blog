@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from ..permissions import IsOwner
+from ..permissions import IsOwnerOrReadOnly
 from ..models.repost_request import RepostRequest, Post, User, Role
 from ..serializers.repost import (
     RepostSerializer,
@@ -13,7 +13,7 @@ from ..serializers.repost import (
 
 class CreateRepostRequest(APIView):
     '''Creates Repost Request'''
-    class_serializer = RepostSerializer
+    serializer_class = RepostSerializer
 
     def post(self, request, post_id):
         # Check if the user has already created a repost request for the same post
@@ -71,7 +71,7 @@ class RepostRequestsSentList(APIView):
 
 class UpdateRepostRequestStatus(APIView):
     '''Post author can update the status of a request by id, changing status to accepted or denied'''
-    class_serializer = UpdateRepostRequestSerializer
+    serializer_class = UpdateRepostRequestSerializer
 
     def put(self, request, request_id):
         # Get the authenticated user (post owner)
