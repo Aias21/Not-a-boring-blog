@@ -12,6 +12,7 @@ from not_a_boring_blog.serializers.view import ViewCountSerializer
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def create_post_view(request, post_id):
+    """Creates an entry in view table when the user goes to post detail"""
     user = request.user
     post = get_object_or_404(Post, pk=post_id)
     cooldown_period = timedelta(minutes=int(post.min_read))
@@ -28,6 +29,7 @@ def create_post_view(request, post_id):
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def get_post_views(request, post_id):
+    """Counts Post view"""
     try:
         views = View.objects.filter(post_id=post_id)
         view_count = views.count()  # Calculate the view count based on the queryset

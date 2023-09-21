@@ -5,9 +5,8 @@ from ..models.post import Post
 from ..serializers.posts import (
     PostSerializer, 
     PostCreateSerializer, 
-    PostUpdateSerializer, 
-    PostTitleSerializer, 
-    OnlyUserPostSerializer)
+    PostUpdateSerializer
+    )
 from ..permissions import IsOwnerOrReadOnly, IsAdminRole, IsModeratorRole
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from ..models.user import Role, User
@@ -20,11 +19,7 @@ from rest_framework.decorators import permission_classes
 
 
 class PostList(APIView):
-    '''Entire post list, only moderators can see the list'''
-
-    '''
-    To test API you need to use the toke
-    '''
+    """Lists all posts no matter the status, only admins and moderators can see the list"""
     permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
 
     def get(self, request):
@@ -101,26 +96,26 @@ class GetPublicPosts(APIView):
 class GetUserPublicPosts(APIView):
     '''You get only published  posts of a specific user'''
 
-    serializer_class = PostTitleSerializer
+    serializer_class = PostSerializer
     permission_classes = [AllowAny]
 
 
     def get_queryset(self):
         username = self.kwargs['username']
-        role = get_object_or_404(User, username=username)
-        return Post.objects.filter(user_id=role, status='published')
+        user = get_object_or_404(User, username=username)
+        return Post.objects.filter(user_id=user, status='published')
     
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         if not queryset:
-            return Response({"detail" : f"{self.kwargs['username']} has no posts"}, status.HTTP_200_OK)
+            return Response({"detail": f"{self.kwargs['username']} has no posts"}, status.HTTP_200_OK)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
 
 class GetUserPosts(ListAPIView):
     '''The user can see only his/her own posts'''
-    serializer_class = OnlyUserPostSerializer
+    serializer_class = PostSerializer
     
     def get_queryset(self):
         user = self.request.user

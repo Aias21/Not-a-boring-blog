@@ -12,7 +12,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'get_categories', 'created_at', 'last_updated', 'status')
+    list_display = ('title', 'user_id','get_categories', 'created_at', 'last_updated', 'status')
     list_filter = ('category__category_name', 'status')
     search_fields = ('title', 'body', 'description')
 
