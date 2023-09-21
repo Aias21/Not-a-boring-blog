@@ -1,1 +1,1 @@
-from Not-a-boring-blog.not_a_boring_blog.tests.test_PostList import *
+from not_a_boring_blog.tests.tests_Post import *

@@ -47,7 +47,7 @@ class PostCreate(APIView):
 
 class PostDetail(APIView):
     '''Post Detail view for get, update, delete'''
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+    permission_classes = [IsOwnerOrReadOnly]
     serializer_class = PostUpdateSerializer
 
     def get_post(self, pk):
