@@ -4,13 +4,8 @@ from rest_framework.exceptions import ValidationError
 from datetime import date, datetime
 from django.utils.html import strip_tags
 from ..models.user import Role, User
+from .category import CategorySerializer
 
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['category_name']
         
 class UniqueBodyValidator:
     def __call__(self, value):
@@ -20,10 +15,9 @@ class UniqueBodyValidator:
 
 class DateValidator:
     def __call__(self, value):
-        print(type(value))
-        print(type(datetime.today()))
         if value > datetime.today():
             raise ValidationError(f'The date cannot be further than {datetime.today()}')
+
 
 class DateField(serializers.ReadOnlyField):
     def to_representation(self, obj):
@@ -42,11 +36,11 @@ class DateField(serializers.ReadOnlyField):
 
 
 class PostUpdateSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(many=True, read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
+
     class Meta:
         model = Post
-        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body',  'created_at', 'last_updated']
-
+        fields = ['title', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 class PostSerializer(serializers.ModelSerializer):
     last_updated = serializers.DateTimeField(validators=[DateValidator()], required=False)
@@ -70,12 +64,13 @@ class PostSerializer(serializers.ModelSerializer):
 
 class PostCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
+    description = serializers.CharField(max_length=500)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     body = serializers.CharField(validators=[UniqueBodyValidator()])  # Add UniqueBodyValidator here
+
     class Meta:
         model = Post
-        fields = ['title', 'user_id', 'category', 'status', 'min_read', 'description', 'body']
+        fields = ['title', 'category', 'status', 'min_read', 'description', 'body']
 
     def validate_description(self, value):
         return strip_tags(value)
@@ -91,6 +86,7 @@ class PostTitleSerializer(serializers.ModelSerializer):
 
 class OnlyUserPostSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(many=True)  # Use CategorySerializer for the category field
+
     class Meta:
         model = Post
         fields = ['id', 'title', 'user_id', 'category', 'status', 'min_read', 'description', 'created_at', 'last_updated']

@@ -10,14 +10,21 @@ from ..serializers.posts import (
     OnlyUserPostSerializer)
 from ..permissions import IsOwnerOrReadOnly, IsAdminRole, IsModeratorRole
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from ..models.user import Role
+from ..models.user import Role, User
+from rest_framework.decorators import api_view
+from rest_framework.authtoken.models import Token
+from rest_framework import permissions
 from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404, get_list_or_404
 
 
 class PostList(APIView):
-    '''Entire post list, only admins can see the list'''
-    permission_classes = [IsAuthenticated, IsAdminRole, IsModeratorRole]
+    '''Entire post list, only moderators can see the list'''
+
+    '''
+    To test API you need to use the toke
+    '''
+    permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
 
     def get(self, request):
         posts = Post.objects.all()
@@ -27,18 +34,21 @@ class PostList(APIView):
 
 class PostCreate(APIView):
     '''Post creation view'''
-    permission_classes = [IsAuthenticated]
+    serializer_class = PostCreateSerializer
+
     def post(self, request):
+        user_id = request.user.id  # Get the user_id from the request
         serializer = PostCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED) # or status=201
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) # or status=400
+            serializer.save(user_id_id=user_id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PostDetail(APIView):
     '''Post Detail view for get, update, delete'''
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+    serializer_class = PostUpdateSerializer
 
     def get_post(self, pk):
         try:
@@ -71,10 +81,10 @@ class PostDetail(APIView):
 
     def delete(self, request, pk):
         post = self.get_post(pk)
-        if post and post.user_id.user == request.user:
+        if post and post.user_id == request.user:
             post.delete()
             return Response({"detail": "Deletion is done"}, status=status.HTTP_204_NO_CONTENT)
-        return Response({"detail": "Permission denied"}, status=403)
+        return Response({"detail": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class GetPublicPosts(APIView):
@@ -96,11 +106,13 @@ class GetUserPublicPosts(APIView):
 
     def get_queryset(self):
         username = self.kwargs['username']
-        role = get_object_or_404(Role, user__username=username)
+        role = get_object_or_404(User, username=username)
         return Post.objects.filter(user_id=role, status='published')
     
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        if not queryset:
+            return Response({"detail" : f"{self.kwargs['username']} has no posts"}, status.HTTP_200_OK)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -111,8 +123,7 @@ class GetUserPosts(ListAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        role = user.role
-        queryset = Post.objects.filter(user_id=role)
+        queryset = Post.objects.filter(user_id=user)
         get_list_or_404(queryset)
         return queryset
     
