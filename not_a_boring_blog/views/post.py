@@ -9,14 +9,10 @@ from ..serializers.posts import (
     PostTitleSerializer, 
     OnlyUserPostSerializer)
 from ..permissions import IsOwnerOrReadOnly, IsAdminRole, IsModeratorRole
-from rest_framework.permissions import AllowAny, IsAdminUser
-from ..models.user import Role, User
-from rest_framework.decorators import api_view
-from rest_framework.authtoken.models import Token
-from rest_framework import permissions
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from ..models.user import Role
 from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404, get_list_or_404
-from rest_framework.decorators import permission_classes
 
 
 class PostList(APIView):
@@ -28,7 +24,7 @@ class PostList(APIView):
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data, status=200) # or status=200
 
-      
+
 class PostCreate(APIView):
     '''Post creation view'''
     permission_classes = [IsAuthenticated]
@@ -80,7 +76,7 @@ class PostDetail(APIView):
             return Response({"detail": "Deletion is done"}, status=status.HTTP_204_NO_CONTENT)
         return Response({"detail": "Permission denied"}, status=403)
 
-      
+
 class GetPublicPosts(APIView):
     '''You get only published  posts of every user'''
     permission_classes = [AllowAny]

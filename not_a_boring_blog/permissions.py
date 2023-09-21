@@ -20,7 +20,7 @@ class IsModeratorRole(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.role.is_moderator
 
-      
+
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Check if the request user is the author of the comment.
