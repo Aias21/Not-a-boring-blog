@@ -12,7 +12,7 @@ from ..serializers.repost import (
 
 
 class CreateRepostRequest(APIView):
-    '''Creates Repost Request'''
+    """Creates Repost Request"""
     serializer_class = RepostSerializer
 
     def post(self, request, post_id):
@@ -45,7 +45,7 @@ class CreateRepostRequest(APIView):
 
 
 class RepostRequestedReceivedList(APIView):
-    '''Returns requests to post author'''
+    """Returns requests to post author"""
 
     def get(self, request):
         # Get the authenticated user (post owner)
@@ -58,7 +58,7 @@ class RepostRequestedReceivedList(APIView):
 
 
 class RepostRequestsSentList(APIView):
-    '''Returns requests sent by user'''
+    """Returns requests sent by user"""
 
     def get(self, request):
         user = self.request.user
@@ -70,7 +70,7 @@ class RepostRequestsSentList(APIView):
 
 
 class UpdateRepostRequestStatus(APIView):
-    '''Post author can update the status of a request by id, changing status to accepted or denied'''
+    """Post author can update the status of a request by id - updates status to accepted or denied"""
     serializer_class = UpdateRepostRequestSerializer
 
     def put(self, request, request_id):
@@ -100,7 +100,7 @@ class UpdateRepostRequestStatus(APIView):
 
 
 class DeleteRepostRequestView(APIView):
-    '''Requester can delete a request by id'''
+    """Requester can delete a request by id"""
     def delete(self, request, request_id):
         # Get the authenticated user (post owner)
         user = self.request.user

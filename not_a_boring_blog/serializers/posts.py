@@ -5,7 +5,7 @@ from datetime import date, datetime
 from django.utils.html import strip_tags
 from ..models.user import Role, User
 from .category import CategorySerializer
-
+from datetime import datetime
         
 class UniqueBodyValidator:
     def __call__(self, value):
@@ -42,13 +42,18 @@ class PostUpdateSerializer(serializers.ModelSerializer):
         model = Post
         fields = ['title', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
 
+
 class PostSerializer(serializers.ModelSerializer):
-    last_updated = serializers.DateTimeField(validators=[DateValidator()], required=False)
+    last_updated = serializers.DateTimeField(format="%d-%B-%Y %H:%M", validators=[DateValidator()], required=False)
     title = serializers.CharField(required=True, max_length=255)
-    created_at = serializers.DateTimeField(validators=[DateValidator()], required=False)
+    created_at = serializers.DateTimeField(format="%d-%B-%Y %H:%M", validators=[DateValidator()], required=False)
     category = serializers.StringRelatedField(many=True)  # 
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    
+    author = serializers.SerializerMethodField()
+
+    def get_author(self, obj):
+        return obj.user_id.username
+
     def validate_description(self, value):
         return strip_tags(value)
 
@@ -59,7 +64,8 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'user_id', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
+        fields = ['id', 'title', 'user_id', 'author', 'category', 'status',
+                  'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
@@ -74,19 +80,3 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     def validate_description(self, value):
         return strip_tags(value)
-
-
-class PostTitleSerializer(serializers.ModelSerializer):
-    category = serializers.StringRelatedField(many=True)  # Use StringRelatedField for category
-
-    class Meta:
-        model = Post
-        fields = ['title', 'user_id', 'min_read', 'category', 'description', 'created_at']
-
-
-class OnlyUserPostSerializer(serializers.ModelSerializer):
-    category = serializers.StringRelatedField(many=True)  # Use CategorySerializer for the category field
-
-    class Meta:
-        model = Post
-        fields = ['id', 'title', 'user_id', 'category', 'status', 'min_read', 'description', 'created_at', 'last_updated']

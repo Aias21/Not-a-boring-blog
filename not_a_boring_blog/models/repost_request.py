@@ -11,6 +11,7 @@ STATUS = (
 
 
 class RepostRequest(models.Model):
+    """Repost request model"""
     requester_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='requester')
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='repost')
     status = models.CharField(max_length=9, choices=STATUS)

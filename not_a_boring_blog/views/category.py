@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class CreateCategory(APIView):
+    """Creates post category"""
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
 
@@ -28,6 +29,7 @@ class CreateCategory(APIView):
 
 
 class ListCategories(APIView):
+    """Lists existing categories"""
     serializer_class = CategoriesSerializer
 
     def get(self, request):

@@ -4,6 +4,7 @@ from .user import Role
 from django.contrib.auth.models import User
 
 class Category(models.Model):
+    """Category model"""
     category_name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
@@ -11,6 +12,7 @@ class Category(models.Model):
 
 
 class Post(models.Model):
+    """Post model"""
     STATUS = [
         ('published', 'Published'),
         ('private', 'Private'),

@@ -11,7 +11,7 @@ from ..models.user import User
 
 
 class PostCommentList(APIView):
-    '''Gets all comments, visible for everyone'''
+    """Gets all comments - visible for everyone"""
     permission_classes = [AllowAny]
 
     def get(self, request, post_id):
@@ -25,11 +25,12 @@ class PostCommentList(APIView):
 
 
 class CreateComment(APIView):
-    '''Create comment, only authenticated users can do it'''
+    """Create comment - only authenticated users can do it, only to public posts"""
     serializer_class = ReplyCommentSerializer
+
     def post(self, request, post_id):
         try:
-            post = Post.objects.get(pk=post_id)  # Retrieve the associated post
+            post = Post.objects.get(pk=post_id, status='published')  # Retrieve the associated post
         except Post.DoesNotExist:
             return Response({"detail": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = ReplyCommentSerializer(data=request.data)
@@ -41,8 +42,7 @@ class CreateComment(APIView):
 
 
 class UpdateComment(APIView):
-    '''Update/Delete comment, only authenticated users can do this that are also authors'''
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    """Get/Update/Delete comment - only authenticated users can do this that are also authors"""
     serializer_class = ReplyCommentSerializer
 
     def get_comment(self, comment_id):
@@ -60,7 +60,7 @@ class UpdateComment(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, comment_id):
-        comment = self.get_comment(comment_id)
+        comment = Comment.objects.get(pk=comment_id)
         if comment is None:
             return Response({"detail": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = ReplyCommentSerializer(comment, data=request.data)
@@ -73,7 +73,7 @@ class UpdateComment(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, comment_id):
-        comment = self.get_comment(comment_id)
+        comment = Comment.objects.get(pk=comment_id)
         if comment is None:
             return Response({"detail": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
         if comment.author != request.user:

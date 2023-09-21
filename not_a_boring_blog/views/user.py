@@ -25,7 +25,7 @@ from django.db.models import Q
 
 
 class UserList(APIView):
-    '''Returns the entire list of users on the platform - for Admin use'''
+    """Returns the entire list of users on the platform - for Admin use"""
 
     # permission_classes = [AllowAny]
 
@@ -36,7 +36,7 @@ class UserList(APIView):
 
 
 class UpdateUserRole(APIView):
-    '''Updating user role - only admin should be able to do this operation'''
+    """Updating user role - only admin should be able to do this operation"""
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateRoleSerializer
 
@@ -55,7 +55,7 @@ class UpdateUserRole(APIView):
 
 
 class RegisterUser(APIView):
-    '''User registration, all users should be allowed to register'''
+    """User registration - all users should be allowed to register"""
     permission_classes = [AllowAny]
     serializer_class = CustomUserSerializer
 
@@ -79,7 +79,7 @@ class RegisterUser(APIView):
 
 
 class UpdateUser(APIView):
-    '''Used to update user information, username, email and bio'''
+    """Update user information - username, email and bio, user needs to be authorized"""
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateUserSerializer
 
@@ -87,7 +87,6 @@ class UpdateUser(APIView):
         try:
             user = User.objects.get(id=request.user.id)
             role = Role.objects.get(user=user)  # Get the Role associated with the user
-            print(role)
         except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
         except Role.DoesNotExist:
@@ -107,10 +106,10 @@ class UpdateUser(APIView):
 
 
 class ChangeUserPassword(APIView):
+    """Change user password - user needs to be authorized"""
     serializer_class = ChangePasswordSerializer
 
     def put(self, request):
-        '''This method is used by the user to change password'''
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
@@ -124,7 +123,8 @@ class ChangeUserPassword(APIView):
 
 
 class LoginUser(APIView):
-    '''User login, token is created'''
+    """Login user - can be done with username or email, token is created.
+    All authorized actions require this token"""
     permission_classes = [AllowAny]
     serializer_class = LoginUserSerializer
 
@@ -170,7 +170,7 @@ class LoginUser(APIView):
 
 
 class LogoutUser(APIView):
-    '''Logout user - token is destroyed'''
+    """Logout user - token is destroyed"""
     def get(self, request, format=None):
         # simply delete the token to force a logout
         try:

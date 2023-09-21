@@ -1,11 +1,12 @@
 from django.db import models
 from .post import Post
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 
 
 class Comment(models.Model):
+    """Comment model"""
     post_id = models.ForeignKey(Post, on_delete=models.CASCADE)
-    author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     body = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     parent_id = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
