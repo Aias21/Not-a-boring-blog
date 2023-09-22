@@ -42,7 +42,7 @@ class PostCreate(APIView):
         if serializer.is_valid():
             serializer.save(user_id_id=user_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class PostDetail(APIView):
