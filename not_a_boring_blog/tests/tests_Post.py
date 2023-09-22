@@ -13,9 +13,11 @@ import json
 class PostListTest(TestCase):
     def setUp(self):
         self.client = APIClient()
+        
         self.admin = User.objects.create(username='aknet1', password='Dci1234!')
         self.admin_token = Token.objects.create(user=self.admin)
         self.role = Role.objects.create(user=self.admin, is_admin=True, is_moderator=True)
+        
         self.category = Category.objects.create(category_name='Test Category')
         self.post = Post.objects.create(
             title='Test Post',
