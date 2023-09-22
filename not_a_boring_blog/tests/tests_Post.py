@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from ..models.post import Category, Post
 from django.contrib.auth.models import User
-from ..serializers.posts import PostSerializer, PostUpdateSerializer, PostCreateSerializer, PostTitleSerializer
+from ..serializers.posts import PostSerializer
 from ..permissions import IsAdminRole, IsModeratorRole
 from django.urls import reverse
 from rest_framework.authtoken.models import Token

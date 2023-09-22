@@ -7,10 +7,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):     
         if request.method in permissions.SAFE_METHODS:
-            print("i'm being used")
             if obj.user_id == request.user or obj.status == 'published':
-                print(obj.user_id)
-                print(request.user)
                 return True
         return False
 
