@@ -15,7 +15,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework import permissions
 from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404, get_list_or_404
-from rest_framework.decorators import permission_classes
 
 
 class PostList(APIView):
@@ -38,12 +37,12 @@ class PostCreate(APIView):
         if serializer.is_valid():
             serializer.save(user_id_id=user_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class PostDetail(APIView):
     '''Post Detail view for get, update, delete'''
-    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
+    permission_classes = [IsOwnerOrReadOnly]
     serializer_class = PostUpdateSerializer
 
     def get_post(self, pk):
@@ -82,7 +81,7 @@ class PostDetail(APIView):
             return Response({"detail": "Deletion is done"}, status=status.HTTP_204_NO_CONTENT)
         return Response({"detail": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
 
-      
+
 class GetPublicPosts(APIView):
     '''You get only published  posts of every user'''
     permission_classes = [AllowAny]
