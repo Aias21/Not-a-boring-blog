@@ -7,6 +7,7 @@ from ..models.user import Role
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+import json
 
 
 
@@ -18,11 +19,7 @@ class PostCommentListTest(TestCase):
         self.blogger = User.objects.create(username='blogger', password='blogger')
         self.blogger_role = Role.objects.create(user=self.blogger, is_blogger=True)
         self.blogger_token = Token.objects.create(user=self.blogger)
-        
-        self.blogger2 = User.objects.create(username='blogger2', password='blogger2')
-        self.blogger_role2 = Role.objects.create(user=self.blogger2, is_blogger=True)
-        self.blogger_token2 = Token.objects.create(user=self.blogger2)
-        
+                
         self.post = Post.objects.create(
             title='Sample Post',
             body='Sample Body',
@@ -59,15 +56,54 @@ class PostCommentListTest(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    # def test_list_comments_no_comments(self):
-    #     comments_before_delete = Comment.objects.filter(post_id_id=self.post.id).count()
-    #     Comment.objects.filter(post_id_id=self.post.id).delete()
 
-    #     comments_after_delete = Comment.objects.filter(post_id_id=self.post.id).count()
 
-    #     response = self.client.get(self.url)
+class CreateCommentTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create(username='user', password='passworduser')
         
-    #     print("Number of comments before delete:", comments_before_delete)
-    #     print("Number of comments after delete:", comments_after_delete)
+        self.blogger = User.objects.create(username='blogger', password='blogger')
+        self.blogger_role = Role.objects.create(user=self.blogger, is_blogger=True)
+        self.blogger_token = Token.objects.create(user=self.blogger)
+                
+        self.post = Post.objects.create(
+            title='Sample Post',
+            body='Sample Body',
+            user_id=self.blogger,
+            status='published',
+            min_read='5 mins',
+            description='Sample Description'
+        )     
+        self.url = reverse('not_a_boring_blog:create_comment', kwargs={'post_id': self.post.id})
+
+    def test_if_post_does_not_exist(self):
+        non_existent_post_id = 11111
+        url = reverse('not_a_boring_blog:create_comment', kwargs={'post_id': non_existent_post_id})
+
+        # headers = {
+        #     'HTTP_AUTHORIZATION': f'Token {self.blogger_token.key}',
+        #     'content_type': 'application/json',
+        # }
         
-    #     self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.post(url, **headers)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND) 
+
+
+    def test_create_comment_by_unregistered_user(self):
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    
+    def test_create_comment_by_blogger(self):
+        headers = {
+            'HTTP_AUTHORIZATION': f'Token {self.blogger_token.key}',
+            'content_type': 'application/json',
+        }
+        body = {
+            "body": "A sample comment"
+        }        
+        response = self.client.post(self.url, data=json.dumps(body), **headers)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    
+    
