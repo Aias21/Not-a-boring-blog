@@ -17,19 +17,28 @@ class ReplyCommentSerializer(serializers.ModelSerializer):
 
 
 class ReplyDetailsSerializer(serializers.ModelSerializer):
+    author_username = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%d-%B-%Y %H:%M", required=False)
+
     class Meta:
         model = Comment
-        fields = ['id', 'author', 'body', 'created_at', 'parent_id']
+        fields = ['id', 'author', 'author_username', 'body', 'created_at', 'parent_id']
 
+    def get_author_username(self, obj):
+        return obj.author.username
 
 class CommentSerializer(serializers.ModelSerializer):
     replies = ReplyDetailsSerializer(many=True)
-
+    author_username = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%d-%B-%Y %H:%M", required=False)
     class Meta:
         model = Comment
-        fields = ['id', 'post_id', 'body', 'created_at', 'author', 'replies']
+        fields = ['id', 'post_id', 'author_username', 'body', 'created_at', 'author', 'replies']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['replies_count'] = instance.replies.count()
         return representation
+
+    def get_author_username(self, obj):
+        return obj.author.username
