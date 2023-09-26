@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from ..models.post import Post
 from ..models.user import User
+from django.http import Http404
+
 
 
 class PostCommentList(APIView):
@@ -17,6 +19,8 @@ class PostCommentList(APIView):
     def get(self, request, post_id):
         try:
             comments = Comment.objects.filter(post_id=post_id, parent_id=None)  # Retrieve top-level comments (not replies)
+            if not comments.exists():
+                raise Http404("No comments found")
             serializer = CommentSerializer(comments, many=True, context={'request': request})
 
         except Comment.DoesNotExist:
