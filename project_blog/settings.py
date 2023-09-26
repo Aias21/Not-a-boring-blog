@@ -123,7 +123,7 @@ if DATABASE_CHOICE == "sqlite":
 elif DATABASE_CHOICE == "remote_db":
     DATABASES = {
         'default': dj_database_url.config(
-            default='postgres://admin:h2sCRZSYDeDdtilT0EKyAivaJQ30Bu8L@dpg-ck9eanpehpqs73cksqrg-a.frankfurt-postgres.render.com/not_a_boring_blog'
+            default=os.environ.get("DATABASE_URL")
         )
     }
 
