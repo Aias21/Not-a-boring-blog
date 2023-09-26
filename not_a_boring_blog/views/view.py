@@ -26,14 +26,33 @@ def create_post_view(request, post_id):
     return Response({"error": "Cooldown period not elapsed"}, status=429)
 
 
+####### The last test doesn't work without post = ..., it ses it as if 200:
+# @api_view(['GET'])
+# @permission_classes([permissions.AllowAny])
+# def get_post_views(request, post_id):
+#     """Counts Post view"""
+#     post = get_object_or_404(Post, pk=post_id)
+
+#     try:
+#         views = View.objects.filter(post_id=post_id)
+#         view_count = views.count()  # Calculate the view count based on the queryset
+#         serializer = ViewCountSerializer({'view_count': view_count})
+#     except View.DoesNotExist:
+#         return Response({"detail": "No view found for this post"}, status=status.HTTP_404_NOT_FOUND)
+#     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def get_post_views(request, post_id):
     """Counts Post view"""
-    try:
-        views = View.objects.filter(post_id=post_id)
-        view_count = views.count()  # Calculate the view count based on the queryset
-        serializer = ViewCountSerializer({'view_count': view_count})
-    except View.DoesNotExist:
-        return Response({"detail": "No view found for this post"}, status=status.HTTP_404_NOT_FOUND)
+    post = get_object_or_404(Post, pk=post_id)
+
+    views = View.objects.filter(post_id=post_id)
+    view_count = views.count()  # Calculate the view count based on the queryset
+    serializer = ViewCountSerializer({'view_count': view_count})
+
+    if view_count == 0:
+        return Response({"detail": "No views found for this post"}, status=status.HTTP_404_NOT_FOUND)
     return Response(serializer.data, status=status.HTTP_200_OK)
