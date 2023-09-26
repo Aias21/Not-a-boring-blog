@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -120,6 +120,13 @@ if DATABASE_CHOICE == "sqlite":
             'NAME': BASE_DIR / "db.sqlite3"
         }
     }
+elif DATABASE_CHOICE == "remote_db":
+    DATABASES = {
+        'default': dj_database_url.config(
+            default='postgres://admin:h2sCRZSYDeDdtilT0EKyAivaJQ30Bu8L@dpg-ck9eanpehpqs73cksqrg-a.frankfurt-postgres.render.com/not_a_boring_blog'
+        )
+    }
+
 else:
     DATABASES = {
         'default': {
