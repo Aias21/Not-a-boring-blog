@@ -28,7 +28,10 @@ print(SECRET_KEY)
 DEBUG = os.environ.get("DEBUG", True)
 
 ALLOWED_HOSTS = ['*']
-FRONTEND_PRODUCTION_ENV = os.environ.get("FRONTEND_PRODUCTION_ENV",False)
+
+CORS_ALLOW_CREDENTIALS = True
+
+FRONTEND_PRODUCTION_ENV = os.environ.get("FRONTEND_PRODUCTION_ENV", False)
 if FRONTEND_PRODUCTION_ENV:
     CORS_ALLOWED_ORIGINS = [os.environ.get("FRONTEND_LINK")]
     CSRF_TRUSTED_ORIGINS = [os.environ.get("FRONTEND_LINK")]
@@ -40,7 +43,7 @@ else:
     ]
     CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000']
 
-CORS_ALLOW_CREDENTIALS = True
+
 
 # Application definition
 
