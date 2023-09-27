@@ -11,7 +11,6 @@ from rest_framework.authtoken.models import Token
 import json
 from django.contrib.auth.hashers import make_password
 from django.utils.timezone import now
-from datetime import timedelta
 from ..models.repost_request import RepostRequest, STATUS
 
 
