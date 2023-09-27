@@ -3,6 +3,7 @@ from ..models.repost_request import RepostRequest
 
 
 class RepostSerializer(serializers.ModelSerializer):
+    # because of default there will never be 400 error
     status = serializers.CharField(default="requested")  # Set default value to "requested"
 
     class Meta:
