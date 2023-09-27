@@ -5,9 +5,11 @@ from ..models.comment import Comment
 class ReplyCommentSerializer(serializers.ModelSerializer):
     '''Serializer for reply'''
     body = serializers.CharField(max_length=500, required=True)
+    author_username = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%d-%B-%Y %H:%M", required=False)
     class Meta:
         model = Comment
-        fields = ['id', 'body', 'created_at']
+        fields = ['id', 'body', 'author', 'author_username', 'created_at']
 
     def update(self, instance, validated_data):
         # Add custom logic here, if needed
@@ -15,6 +17,8 @@ class ReplyCommentSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    def get_author_username(self, obj):
+        return obj.author.username
 
 class ReplyDetailsSerializer(serializers.ModelSerializer):
     author_username = serializers.SerializerMethodField()
