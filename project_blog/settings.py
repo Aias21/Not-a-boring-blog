@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,13 +29,21 @@ DEBUG = os.environ.get("DEBUG", True)
 
 ALLOWED_HOSTS = ['*']
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'https://127.0.0.1:3000'
-]
-
 CORS_ALLOW_CREDENTIALS = True
+
+FRONTEND_PRODUCTION_ENV = os.environ.get("FRONTEND_PRODUCTION_ENV", False)
+if FRONTEND_PRODUCTION_ENV:
+    CORS_ALLOWED_ORIGINS = [os.environ.get("FRONTEND_LINK")]
+    CSRF_TRUSTED_ORIGINS = [os.environ.get("FRONTEND_LINK")]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'https://127.0.0.1:3000'
+    ]
+    CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000']
+
+
 
 # Application definition
 
@@ -78,8 +86,7 @@ MIDDLEWARE = [
 ]
 
 
-CSRF_TRUSTED_ORIGINS = [os.environ.get("FRONTEND_LINK")]
-# CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000'] #  ToDo remove this line when it works
+
 
 ROOT_URLCONF = 'project_blog.urls'
 
@@ -113,6 +120,13 @@ if DATABASE_CHOICE == "sqlite":
             'NAME': BASE_DIR / "db.sqlite3"
         }
     }
+elif DATABASE_CHOICE == "remote_db":
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get("DATABASE_URL")
+        )
+    }
+
 else:
     DATABASES = {
         'default': {
@@ -161,9 +175,32 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
+MEDIA_ROOT = "collections/media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+USE_S3_SETUP = os.environ.get("USE_S3_SETUP", True)
+if USE_S3_SETUP:
+    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID") # env
+    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")  # env
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")  # env
+    DEFAULT_FILE_STORAGE = "storages.backend.s3boto3.S3BotoStorage"
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")  # env
+    AWS_S3_VERIFY = True
+    AWS_S3_SIGNATURE_NAME = "s3v4"
+    AWS_DEFAULT_ACL = None
+
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl':'max-age=86400'}
+    AWS_LOCATION = 'collections/static_collection'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+else:
+    STATIC_URL = 'static/'
+    STATIC_ROOT = "collections/static_collection"
