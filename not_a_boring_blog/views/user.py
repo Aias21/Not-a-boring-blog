@@ -27,9 +27,12 @@ from not_a_boring_blog.permissions import IsAdminRole
 
 class UserList(APIView):
     """
-    Returns the entire list of users on the platform.\n
-    - Only users with Admin role can use this view;\n
-    To test you will need a Token from Admin role user:\n
+    Returns the entire list of users on the platform.
+
+    - Only users with Admin role can use this view;
+
+    To test you will need a Token from Admin role user:
+
     - You can get one by using the user/login/ APIView with username:"admin" and pass:"admin1234".
     Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
     (name may differ, look for a key that contains token in its name);
@@ -38,6 +41,7 @@ class UserList(APIView):
     - In this field you'll need to have something similar to: Token <u>TokenAuthKey</u>
     <- this should be in you clipboard from the previous steps;
     - Press <b>Try it out</b> button then <b>Execute</b>;
+
     You should now see a Curl request, URL request and the Response with all users or an error message,
     if not scroll a little bit down.
     """
@@ -52,9 +56,12 @@ class UserList(APIView):
 
 class UpdateUserRole(APIView):
     """
-    Used to update user role.\n
-    - Only users with Admin role can use this view;\n
-    To test you will need a Token from Admin role user:\n
+    Used to update user role.
+
+    - Only users with Admin role can use this view;
+
+    To test you will need a Token from Admin role user:
+
     - You can get one by using the user/login/ APIView with username:"admin" and pass:"admin1234".
     Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
     (name may differ, look for a key that contains token in its name);
@@ -86,9 +93,12 @@ class UpdateUserRole(APIView):
 
 class RegisterUser(APIView):
     """
-    Used to register user.\n
-    - This action is allowed to all users;\n
-    To test this APIView:\n
+    Used to register user.
+
+    - This action is allowed to all users;
+
+    To test this APIView:
+
     - Press <b>Try it out</b>;
     - Scroll down to request body and insert values for username, email and password;
     - Press <b>Execute</b> and check Response Body for result;
@@ -113,9 +123,12 @@ class RegisterUser(APIView):
 
 class UpdateUser(APIView):
     """
-    Used to update user information - username, email and bio.\n
-    - User needs to be authorized;\n
-    To test you will need the user token, token is generated when user logs in:\n
+    Used to update user information - username, email and bio.
+
+    - User needs to be authorized;
+
+    To test you will need the user token, token is generated when user logs in:
+
     - You can get one by using the user/login/ APIView ->
     for this you need an already registered user with user/register APIView.
     - Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
@@ -154,9 +167,12 @@ class UpdateUser(APIView):
 
 class ChangeUserPassword(APIView):
     """
-    Used to change user password.\n
-    - User needs to be authorized;\n
-    To test you will need the user token, token is generated when user logs in:\n
+    Used to change user password.
+
+    - User needs to be authorized;
+
+    To test you will need the user token, token is generated when user logs in:
+
     - You can get one by using the user/login/ APIView ->
     for this you need an already registered user with user/register APIView.
     - Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
@@ -186,10 +202,13 @@ class ChangeUserPassword(APIView):
 
 class LoginUser(APIView):
     """
-    Used to log in user.\n
+    Used to log in user.
+
     - This action can be performed by all users;
-    - <u>At log in a token is being created, all authorized actions can only be performed with this Token;</u>\n
-    To test you will need to have a registered user:\n
+    - <u>At log in a token is being created, all authorized actions can only be performed with this Token;</u>
+
+    To test you will need to have a registered user:
+
     - Go to user/register_user/ to register a user if you don't have one already;
     - Press <b>Try it out</b>;
     - In Request Body insert username/email and password;
@@ -246,10 +265,12 @@ class LoginUser(APIView):
 
 class LogoutUser(APIView):
     """
-    Used to log out user.\n
+    Used to log out user.
+
     - Deletes user Authentication token;
-    - User needs to be logged in;\n
-    To test you will need the user token, token is generated when user logs in:\n
+    - User needs to be logged in;
+
+    To test you will need the user token, token is generated when user logs in:
     - You can get one by using the user/login/ APIView ->
     for this you need an already registered user with user/register APIView.
     - Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
