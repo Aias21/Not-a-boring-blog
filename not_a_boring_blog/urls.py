@@ -33,6 +33,7 @@ from .views.repost import (
 from .views.category import (
     CreateCategory,
     ListCategories,
+    PostsByCategory,
 )
 
 
@@ -42,6 +43,7 @@ urlpatterns = [
     # categories
     path('category/create_category/', CreateCategory.as_view(), name='create_category'),
     path('category/list_categories/', ListCategories.as_view(), name='list_categories'),
+    path('category/posts/<str:category_name>', PostsByCategory.as_view(), name='category_posts'),
 
     # post endpoints
     path('post/post_list/', PostList.as_view(), name='post-list'),
