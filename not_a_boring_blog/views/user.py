@@ -46,7 +46,7 @@ class UserList(APIView):
     if not scroll a little bit down.
     """
 
-    permission_classes = [IsAuthenticated, IsAdminRole]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         users = User.objects.all()
