@@ -54,14 +54,17 @@ class CreateCategory(APIView):
 
 
 class ListCategories(APIView):
-    """This API lists all the existing post categories.
-    Requirements:
-    - There are no authentication requirements to list the categories.
-    
-    How to use:
-    - Make a GET request to the API endpoint.
-    - No authentication token or additional headers are needed.
-    - The API will return a list of all existing categories in the database.
+    """This API lists all the existing post categories.<p>
+    <b>Requirements</b>:
+    - There are no authentication requirements to list the categories (no authentication token is needed)<p>
+    ------------------------------------------------------------<p>
+    ***HOW TO USE:***<p>    
+    <ul> In order to get a <b>json</b> list of category names and their id:<p> 
+    ---> first click on <b><i>Try it out</i></b> button<p> 
+    ---> and then on <b><i>Execute</i></b> button<p> 
+    -- If successful, the API will return a list of all existing categories in the database along with <i><u>id(s)</u></i> and <i><u>category_name(s)</u></i>. <p>
+    -- If there are any errors, appropriate error messages will be returned.</ul>
+
     """
     serializer_class = CategoriesSerializer
 
