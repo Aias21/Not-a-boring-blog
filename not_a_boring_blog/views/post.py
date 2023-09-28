@@ -18,14 +18,22 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 
 
 class PostList(APIView):
-    """Lists all posts irrespective of their status.
-    Requirements:
-    - Must be authenticated.
-    - Must have an admin or moderator role.
-    
-    How to use:
-    - Method: GET
-    - Authorization: Token {token(admin or moderator)}
+    """***This API lists all posts irrespective of their status***.
+    <b>Requirements</b>:
+    - The user must be authenticated and have a role of Admin or Moderator.
+    - The user will need to use the token of Admin or Moderator<p>
+     ***HOW TO USE:***<p>
+    <b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to <b>Admin</b> or <b>Moderator</b>. <p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Admin</b> or <b>Moderator</b> <b><i>token key</i></b> and <b>Authorize</b><p>
+    <b>1.3.</b> In order to get a list of all posts of all users <b>('published', 'editing', 'private')</b>, click on <b><i>Try it out</i></b> button<p>
+    <b>1.4.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
+    -- If successful, the API will return a json list of all existing posts. <p>
+    -- If there are any errors, appropriate error messages will be returned.<p>
     """
     permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
 
