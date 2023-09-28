@@ -6,8 +6,22 @@ from ..serializers.category import CategorySerializer, CategoriesSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
-class CreateCategory(APIView):
-    """Creates post category"""
+    
+class CreateCategory(APIView):  
+    """This API creates a post category.
+    Requirements:
+    - The user must be authenticated to create a category.
+    - The category name provided should not yet exist in the database.
+    
+    How to use:
+    - Make a POST request to the API endpoint.
+    - Attach the authentication token in the header to ensure you're authenticated. 
+    The token should belong to an authenticated user.
+    - In the request body, provide the category name you wish to create in the format:
+        {"category_name": "Your Category Name Here"}
+    - If successful, the API will return a success message along with the category ID. 
+    If there are any errors, appropriate error messages will be returned.
+    """ 
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
 
@@ -29,7 +43,15 @@ class CreateCategory(APIView):
 
 
 class ListCategories(APIView):
-    """Lists existing categories"""
+    """This API lists all the existing post categories.
+    Requirements:
+    - There are no authentication requirements to list the categories.
+    
+    How to use:
+    - Make a GET request to the API endpoint.
+    - No authentication token or additional headers are needed.
+    - The API will return a list of all existing categories in the database.
+    """
     serializer_class = CategoriesSerializer
 
     def get(self, request):
