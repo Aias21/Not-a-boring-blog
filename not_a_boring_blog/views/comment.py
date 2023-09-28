@@ -13,7 +13,15 @@ from django.http import Http404
 
 
 class PostCommentList(APIView):
-    """Gets all comments - visible for everyone"""
+    """Gets all comments top-level comments (aren't replies to other comments) for a given post  - visible for everyone
+    Requirements:
+    - No authentication is required to retrieve the comments.
+
+    How to use:
+    - Method: GET 
+    - provide the post_id of the post you want to retrieve comments for in the endpoint. 
+    If there are no comments, a 404 error will be returned.
+    """
     permission_classes = [AllowAny]
 
     def get(self, request, post_id):
@@ -29,7 +37,13 @@ class PostCommentList(APIView):
 
 
 class CreateComment(APIView):
-    """Create comment - only authenticated users can do it, only to public posts"""
+    """This API endpoint allows the creation of a new comment on a public post
+    Requirements:
+    - User must be authenticated to create a comment.
+
+    How to use:
+    - Method:  POST, use post_id you want to comment on in the endpoint
+    """
     serializer_class = ReplyCommentSerializer
 
     def post(self, request, post_id):
@@ -46,7 +60,11 @@ class CreateComment(APIView):
 
 
 class UpdateComment(APIView):
-    """Get/Update/Delete comment - only authenticated users can do this that are also authors"""
+    """Get/ Update/ Delete comment
+    Requirements:
+    - User must be authenticated
+    - The user can only update or delete comments they authored
+    """
     serializer_class = ReplyCommentSerializer
 
     def get_comment(self, comment_id):
@@ -56,6 +74,7 @@ class UpdateComment(APIView):
             return None
 
     def get(self, request, comment_id):
+        '''Make a GET request with the comment_id to get the details of the comment'''
         comment = self.get_comment(comment_id)
         if comment is None:
             return Response({"detail": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -64,6 +83,8 @@ class UpdateComment(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, comment_id):
+        '''Make a PUT request with the comment_id, providing the updated comment data in the request body. 
+        Ensure you are the author of the comment and authenticated with the appropriate token.'''
         comment = Comment.objects.get(pk=comment_id)
         if comment is None:
             return Response({"detail": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -77,6 +98,8 @@ class UpdateComment(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, comment_id):
+        '''Make a DELETE request with the comment_id. 
+        Ensure you are the author of the comment and authenticated.'''
         comment = Comment.objects.get(pk=comment_id)
         if comment is None:
             return Response({"detail": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -88,7 +111,13 @@ class UpdateComment(APIView):
 
 
 class CreateReply(APIView):
-    '''Create reply, only authenticated users can do this'''
+    '''Allows user to create a reply to a specific comment
+    Requirements:
+    -User must be authenticated to create a reply.
+    
+    How to use:
+    - Method: POST, use comment_id you want to reply to to your endpoint, including the reply data in the request body. 
+    '''
     serializer_class = ReplyCommentSerializer
 
     def post(self, request, comment_id):
