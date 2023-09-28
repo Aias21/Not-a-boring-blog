@@ -26,7 +26,25 @@ from not_a_boring_blog.permissions import IsAdminRole
 
 
 class UserList(APIView):
-    """Returns the entire list of users on the platform - for Admin use"""
+    """
+    Returns the entire list of users on the platform.
+
+    - Only users with Admin role can use this view;
+
+    To test you will need a Token from Admin role user:
+
+    - You can get one by using the user/login/ APIView with username:"admin" and pass:"admin1234".
+    Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
+    (name may differ, look for a key that contains token in its name);
+    - Press on the little lock for users_list view call (you should see it on the right);
+    - Scroll down and go to TokenAuth;
+    - In this field you'll need to have something similar to: Token <u>TokenAuthKey</u>
+    <- this should be in you clipboard from the previous steps;
+    - Press <b>Try it out</b> button then <b>Execute</b>;
+
+    You should now see a Curl request, URL request and the Response with all users or an error message,
+    if not scroll a little bit down.
+    """
 
     permission_classes = [IsAuthenticated, IsAdminRole]
 
@@ -37,8 +55,26 @@ class UserList(APIView):
 
 
 class UpdateUserRole(APIView):
-    """Updating user role - only admin should be able to do this operation"""
-    permission_classes = [IsAuthenticated]
+    """
+    Used to update user role.
+
+    - Only users with Admin role can use this view;
+
+    To test you will need a Token from Admin role user:
+
+    - You can get one by using the user/login/ APIView with username:"admin" and pass:"admin1234".
+    Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
+    (name may differ, look for a key that contains token in its name);
+    - Press on the little lock for users_list view call (you should see it on the right);
+    - Scroll down and go to TokenAuth;
+    - In this field you'll need to have something similar to: Token <u>TokenAuthKey</u>
+    <- this should be in you clipboard from the previous steps;
+    - Press <b>Try it out</b>;
+    - You'll need to put in the username of the user of whose role will be updated;
+    - Go in the Request Body section and set role to true; (Only one role can be set to true at a time)
+    - Press <b>Execute</b> and check Response Body for result;
+    """
+    permission_classes = [IsAuthenticated, IsAdminRole]
     serializer_class = UpdateRoleSerializer
 
     def put(self, request, username):
@@ -51,13 +87,22 @@ class UpdateUserRole(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({"details":"You do not have permission for this operation"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class RegisterUser(APIView):
-    """User registration - all users should be allowed to register"""
+    """
+    Used to register user.
+
+    - This action is allowed to all users;
+
+    To test this APIView:
+
+    - Press <b>Try it out</b>;
+    - Scroll down to request body and insert values for username, email and password;
+    - Press <b>Execute</b> and check Response Body for result;
+    """
     permission_classes = [AllowAny]
     serializer_class = CustomUserSerializer
 
@@ -66,22 +111,38 @@ class RegisterUser(APIView):
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
             username = serializer.validated_data.get('username')
-            
             # Check if a user with the same email or username already exists
             if User.objects.filter(Q(username=username)).exists():
                 return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
             elif User.objects.filter(Q(email=email)).exists():
                 return Response({"error": "Email already exists."}, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Hash the password and save the user
-            user = serializer.save()
+            serializer.save()
             return Response({"message": "Registration successful."}, status=status.HTTP_201_CREATED)
-        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateUser(APIView):
-    """Update user information - username, email and bio, user needs to be authorized"""
+    """
+    Used to update user information - username, email and bio.
+
+    - User needs to be authorized;
+
+    To test you will need the user token, token is generated when user logs in:
+
+    - You can get one by using the user/login/ APIView ->
+    for this you need an already registered user with user/register APIView.
+    - Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
+    (name may differ, look for a key that contains token in its name);
+    - Press on the little lock for users_list view call (you should see it on the right);
+    - Scroll down and go to TokenAuth;
+    - In this field you'll need to have something similar to: Token <u>TokenAuthKey</u>
+    <- this should be in you clipboard from the previous steps;
+    - Press <b>Try it out</b>;
+    - Go to Request Body, update the values (<b>Important to know!</b> Because it would take 2 requests, the Request body
+    displayed by swagger is filled with dummy data, but it will be updated to the user if executed. On frontend the
+    information of the user is first retrieved, and then it updated accordingly)
+    - Press <b>Execute</b> and check Response Body for result;
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateUserSerializer
 
@@ -93,22 +154,37 @@ class UpdateUser(APIView):
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
         except Role.DoesNotExist:
             return Response({"detail": "Role not found."}, status=status.HTTP_404_NOT_FOUND)
-
         serializer = UpdateUserSerializer(user, data=request.data, partial=True)
-
         if serializer.is_valid():
             serializer.save()
             # Update the 'bio' field in the associated Role model
             if 'bio' in request.data:
                 role.bio = request.data['bio']
                 role.save()
-
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangeUserPassword(APIView):
-    """Change user password - user needs to be authorized"""
+    """
+    Used to change user password.
+
+    - User needs to be authorized;
+
+    To test you will need the user token, token is generated when user logs in:
+
+    - You can get one by using the user/login/ APIView ->
+    for this you need an already registered user with user/register APIView.
+    - Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
+    (name may differ, look for a key that contains token in its name);
+    - Press on the little lock for users_list view call (you should see it on the right);
+    - Scroll down and go to TokenAuth;
+    - In this field you'll need to have something similar to: Token <u>TokenAuthKey</u>
+    <- this should be in you clipboard from the previous steps;
+    - Press <b>Try it out</b>;
+    - Go to Request Body and change the values of the attributes;
+    - Press <b>Execute</b> and check Response Body for result;
+    """
     serializer_class = ChangePasswordSerializer
 
     def put(self, request):
@@ -125,8 +201,19 @@ class ChangeUserPassword(APIView):
 
 
 class LoginUser(APIView):
-    """Login user - can be done with username or email, token is created.
-    All authorized actions require this token"""
+    """
+    Used to log in user.
+
+    - This action can be performed by all users;
+    - <u>At log in a token is being created, all authorized actions can only be performed with this Token;</u>
+
+    To test you will need to have a registered user:
+
+    - Go to user/register_user/ to register a user if you don't have one already;
+    - Press <b>Try it out</b>;
+    - In Request Body insert username/email and password;
+    - Press <b>Execute</b> and check Response Body for result;
+    """
     permission_classes = [AllowAny]
     serializer_class = LoginUserSerializer
 
@@ -177,7 +264,24 @@ class LoginUser(APIView):
 
 
 class LogoutUser(APIView):
-    """Logout user - token is destroyed"""
+    """
+    Used to log out user.
+
+    - Deletes user Authentication token;
+    - User needs to be logged in;
+
+    To test you will need the user token, token is generated when user logs in:
+    - You can get one by using the user/login/ APIView ->
+    for this you need an already registered user with user/register APIView.
+    - Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
+    (name may differ, look for a key that contains token in its name);
+    - Press on the little lock for users_list view call (you should see it on the right);
+    - Scroll down and go to TokenAuth;
+    - In this field you'll need to have something similar to: Token <u>TokenAuthKey</u>
+    <- this should be in you clipboard from the previous steps;
+    - Press <b>Try it out</b>;
+    - Press <b>Execute</b> and check Response Body for result;
+    """
     def get(self, request, format=None):
         # simply delete the token to force a logout
         try:
