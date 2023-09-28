@@ -18,7 +18,15 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 
 
 class PostList(APIView):
-    """Lists all posts no matter the status, only admins and moderators can see the list"""
+    """Lists all posts irrespective of their status.
+    Requirements:
+    - Must be authenticated.
+    - Must have an admin or moderator role.
+    
+    How to use:
+    - Method: GET
+    - Authorization: Token {token(admin or moderator)}
+    """
     permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
 
     def get(self, request):
@@ -28,7 +36,16 @@ class PostList(APIView):
 
 
 class PostCreate(APIView):
-    '''Post creation view'''
+    '''Allows the creation of a new post.
+    Requirements:
+    - Must be authenticated.
+    
+    How to use:
+    - Method: POST
+    - Authorization: Token {token(any authenticated user)}
+    - Body: Data related to the post in JSON format.
+    '''
+    
     serializer_class = PostCreateSerializer
 
     def post(self, request):
@@ -41,17 +58,26 @@ class PostCreate(APIView):
 
 
 class PostDetail(APIView):
-    '''Post Detail view for get, update, delete'''
+    '''Provides detailed view of a post. 
+    Also allows for updating and deleting a post.
+    
+    Requirements:
+    - Must be owner of the post.
+    '''
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = PostUpdateSerializer
 
-    def get_post(self, pk):
+    def get_post(self, pk):        
         try:
             return Post.objects.get(pk=pk)
         except Post.DoesNotExist:
             return None
 
     def get(self, request, pk):
+        '''How to use (retrieve a Post):
+        - Method: GET
+        - Authorization: Token {token(post owner)}
+        '''      
         post = self.get_post(pk)
         if post:
             if not IsOwnerOrReadOnly().has_object_permission(request, self, post):
@@ -61,6 +87,11 @@ class PostDetail(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, pk):
+        '''How to use (update a Post):
+        - Method: PUT
+        - Authorization: Token {token(post owner)}
+        - Body: Updated post data in JSON format.
+        '''
         post = self.get_post(pk)
         if post:
             if str(request.user) != str(post.user_id):
@@ -75,6 +106,10 @@ class PostDetail(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, pk):
+        '''How to use (delete a Post):
+        - Method: DELETE
+        - Authorization: Token {token(post owner)}
+        '''
         post = self.get_post(pk)
         if post and post.user_id == request.user:
             post.delete()
@@ -83,7 +118,13 @@ class PostDetail(APIView):
 
 
 class GetPublicPosts(APIView):
-    '''You get only published  posts of every user'''
+    '''Fetches all posts that have the status "published"
+    Requirements:
+    - Open to all
+    
+    How to use:
+    - Method: GET
+    '''
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -93,8 +134,13 @@ class GetPublicPosts(APIView):
 
 
 class GetUserPublicPosts(APIView):
-    '''You get only published  posts of a specific user'''
-
+    '''Fetches all published posts of a specified user
+    Requirements:
+    - Open to all
+    
+    How to use:
+    - Method: GET
+    '''
     serializer_class = PostSerializer
     permission_classes = [AllowAny]
 
@@ -113,7 +159,14 @@ class GetUserPublicPosts(APIView):
 
 
 class GetUserPosts(ListAPIView):
-    '''The user can see only his/her own posts'''
+    '''The user can see only his/her own posts
+    Requirements:
+    - Must be authenticated
+    
+    How to use:
+    -Method: GET
+    - Authorization: Token {token(authenticated post author)}
+    '''
     serializer_class = PostSerializer
     
     def get_queryset(self):
