@@ -18,7 +18,23 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 
 
 class PostList(APIView):
-    """Lists all posts no matter the status, only admins and moderators can see the list"""
+    """***This API lists all posts irrespective of their status***<p>
+    <b>Requirements</b>:
+    - The user must be authenticated and have a role of Admin or Moderator.
+    - The user will need to use the token of Admin or Moderator<p>
+     ***HOW TO USE:***<p>
+    <b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to <b>Admin</b> or <b>Moderator</b>. <p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>MODERATOR_OR_ADMIN_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    <b>1.3.</b> In order to get a list of all posts of all users <b>('published', 'editing', 'private')</b>, click on <b><i>Try it out</i></b> button.<p>
+    <b>1.4.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a json list of all existing posts. <p>
+    ---> If there are any errors, appropriate error messages will be returned.<p>
+    """
     permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
 
     def get(self, request):
@@ -28,7 +44,38 @@ class PostList(APIView):
 
 
 class PostCreate(APIView):
-    '''Post creation view'''
+    '''***This API allows the creation of a new post***<p>
+    <b>Requirements</b>:
+    - The user must be authenticated.
+    - The user will need to use their token.
+    - The body text you provide should not yet exist in the database.<p>
+
+    ***HOW TO USE:***<p>
+    <ul><b>1. AUTHENTICATION</b><p>
+    <ul><b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated, using your token. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to the authenticated user.<p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    ------------------------------------------------------------<p>
+    <b>2. BODY</b>:<p>
+    <b>2.1.</b> In order to add <b>json</b> information to the <b>body</b>, click on <b><i>Try it out</i></b> button.<p>
+    <b>2.2.</b> In the request body (application/json), provide information in such format:<p>
+        <b><i>{
+                "title": "string",
+                "category": [1, 3],
+                "status": "published",
+                "min_read": "string",
+                "description": "string",
+                "body": "unique text"
+                }</i></b><p>
+    <b>2.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>POST</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 201 message along with the code itself. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
+    '''
+    
     serializer_class = PostCreateSerializer
 
     def post(self, request):
@@ -41,17 +88,42 @@ class PostCreate(APIView):
 
 
 class PostDetail(APIView):
-    '''Post Detail view for get, update, delete'''
+    '''***Provides detailed view of a separate post. <p>
+    Also allows for updating and deleting a post.*** <p>  
+    
+    ***HOW TO USE:***<p>
+    <ul><b>1. AUTHENTICATION</b><p>
+    <ul><b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated, using your token. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to the authenticated user.<p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    ------------------------------------------------------------<p>
+    '''
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = PostUpdateSerializer
 
-    def get_post(self, pk):
+    def get_post(self, pk):        
         try:
             return Post.objects.get(pk=pk)
         except Post.DoesNotExist:
             return None
 
     def get(self, request, pk):
+        '''***Here the authenticated user can only see a separate post***<p>
+        <b>Requirements</b>:<p>
+        - The user must be authenticated.<p>
+        - The user will need to use their token.<p>
+    
+    <ul><b>1. RETRIEVING</b>:<p>
+    <ul><b>1.1.</b> In order to get <b>json</b> information of a separate post, click on <b><i>Try it out</i></b> button.<p>
+    <b>1.2.</b> In the <b><i>id integer path</i></b> provide an <b>id number</b> of the existing post. <p>
+    <b>1.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 200 message along with the code itself. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
+        '''      
         post = self.get_post(pk)
         if post:
             if not IsOwnerOrReadOnly().has_object_permission(request, self, post):
@@ -61,6 +133,16 @@ class PostDetail(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, pk):
+        '''***This API allows the authenticated user update their own Post***<p>
+
+    <ul><b>1. UPDATING</b>:<p>
+    <ul><b>1.1.</b> In order to put <b>json</b> information, click on <b><i>Try it out</i></b> button.<p>
+    <b>1.2.</b> In the <b><i>id integer path</i></b> provide an <b>id number</b> of the existing post, 
+    then in <b><i>Request body</i></b> update your information.<p>
+    <b>1.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>PUT</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 200 message along with <b><i>created_at</i></b> and <b><i>last_updated</i></b> information as well. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>'''
+    
         post = self.get_post(pk)
         if post:
             if str(request.user) != str(post.user_id):
@@ -75,6 +157,14 @@ class PostDetail(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, pk):
+        '''***This API allows the authenticated user delete their own Post***<p>
+    <ul><b>1. DELETING</b>:<p>
+    <ul><b>1.1.</b> In order to delete a post, click on <b><i>Try it out</i></b> button.<p>
+    <b>1.2.</b> In the <b><i>id integer path</i></b> provide an <b>id number</b> of the post you want to delete.<p>
+    <b>1.3.</b> Press the <b><i>Execute</i></b> button in order to send a <b>DELETE</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 204 message.<p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>'''
+    
         post = self.get_post(pk)
         if post and post.user_id == request.user:
             post.delete()
@@ -83,7 +173,16 @@ class PostDetail(APIView):
 
 
 class GetPublicPosts(APIView):
-    '''You get only published  posts of every user'''
+    '''***This API fetches all posts that have status "published"***<p>
+    <b>Requirements</b>:<p>
+    - All users, including unauthenticated, can see all posts in 'published' status.
+
+    ***HOW TO USE:***<p>
+    <ul><b>1.1.</b> In order to get a <b>json</b> list of all public posts, click on <b><i>Try it out</i></b> button.<p>
+    <b>1.2.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 200 message along with the json list of posts.<p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>'''
+    
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -93,8 +192,16 @@ class GetPublicPosts(APIView):
 
 
 class GetUserPublicPosts(APIView):
-    '''You get only published  posts of a specific user'''
-
+    '''***This API allows to fetch all 'published' posts of a specified user***<p>
+    <b>Requirements</b>:<p>
+    - All users, including unauthenticated, can see all posts in 'published' status of a separate user.
+    
+   ***HOW TO USE:***<p>
+    <ul><b>1.1.</b> In order to get a <b>json</b> list of all posts of a separate user, click on <b><i>Try it out</i></b> button.<p>
+    <b>1.2.</b> In the <b><i>username string path</i></b> provide a <b>username</b> of the post author.<p>
+    <b>1.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 200 message along with the json list of this user posts.<p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>'''
     serializer_class = PostSerializer
     permission_classes = [AllowAny]
 
@@ -113,7 +220,22 @@ class GetUserPublicPosts(APIView):
 
 
 class GetUserPosts(ListAPIView):
-    '''The user can see only his/her own posts'''
+    """***This API lists all your own posts irrespective of their status***<p>
+    <b>Requirements</b>:
+    - The user must be authenticated with their own token.<p>
+     ***HOW TO USE:***<p>
+    <b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to the authenticated user (you).<p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    <b>1.3.</b> In order to get a list of all your posts <b>('published', 'editing', 'private')</b>, click on <b><i>Try it out</i></b> button.<p>
+    <b>1.4.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a json list of all existing posts. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul><p>
+    """
     serializer_class = PostSerializer
     
     def get_queryset(self):

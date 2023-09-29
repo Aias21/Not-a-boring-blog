@@ -5,7 +5,8 @@ from ..models.comment import Comment
 class ReplyCommentSerializer(serializers.ModelSerializer):
     '''Serializer for reply'''
     body = serializers.CharField(max_length=500, required=True)
-    author_username = serializers.SerializerMethodField()
+    author_username = serializers.SerializerMethodField(read_only=True)
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
     created_at = serializers.DateTimeField(format="%d-%B-%Y %H:%M", required=False)
     class Meta:
         model = Comment
