@@ -9,9 +9,18 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
+    num_posts = serializers.SerializerMethodField()
+    num_published_posts = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ['id', 'category_name']
+        fields = ['id', 'category_name', 'num_posts', 'num_published_posts']
+
+    def get_num_posts(self, obj):
+        return obj.posts.count()
+
+    def get_num_published_posts(self, obj):
+        return obj.posts.filter(status='published').count()
 
 
 class CategoryFilterSerializer(serializers.Serializer):
