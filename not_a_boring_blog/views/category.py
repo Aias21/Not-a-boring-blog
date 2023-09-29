@@ -10,7 +10,7 @@ from ..serializers.category import (
 from ..serializers.posts import PostSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from ..models.post import Post
-
+from django.db.models import Count
 
 
 class CreateCategory(APIView):
@@ -40,8 +40,15 @@ class ListCategories(APIView):
     permission_classes = [AllowAny]
     serializer_class = CategoriesSerializer
 
+    # def get(self, request):
+    #     categories = Category.objects.all()
+    #     serializer = CategoriesSerializer(categories, many=True)
+    #     return Response(serializer.data, status=200)
+
     def get(self, request):
-        categories = Category.objects.all()
+        # Annotate each category with the count of related posts
+        categories = Category.objects.annotate(num_posts=Count('posts'), num_published_posts=Count('posts'))
+
         serializer = CategoriesSerializer(categories, many=True)
         return Response(serializer.data, status=200)
 
