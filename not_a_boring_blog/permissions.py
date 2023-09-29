@@ -29,9 +29,10 @@ class IsModeratorRole(permissions.BasePermission):
         return False
 
 
-
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # Check if the request user is the author of the comment.
-        return obj.author == request.user
-
+        if request.method in permissions.SAFE_METHODS:
+            # Check if the request user is the author of the comment.
+            if obj.author == request.user:
+                return True
+        return False

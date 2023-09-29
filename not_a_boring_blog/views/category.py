@@ -2,8 +2,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from ..models.post import Category
-from ..serializers.category import CategorySerializer, CategoriesSerializer
-from rest_framework.permissions import IsAuthenticated
+from ..serializers.category import (
+    CategoryFilterSerializer,
+    CategorySerializer,
+    CategoriesSerializer
+)
+from ..serializers.posts import PostSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from ..models.post import Post
+from django.db.models import Count
 
 
     
@@ -55,6 +62,7 @@ class CreateCategory(APIView):
 
 class ListCategories(APIView):
     """This API lists all the existing post categories.<p>
+    
     <b>Requirements</b>:
     - There are no authentication requirements to list the categories (no authentication token is needed)<p>
     ------------------------------------------------------------<p>
@@ -66,9 +74,33 @@ class ListCategories(APIView):
     -- If there are any errors, appropriate error messages will be returned.</ul>
 
     """
+
+    permission_classes = [AllowAny]
     serializer_class = CategoriesSerializer
 
+    # def get(self, request):
+    #     categories = Category.objects.all()
+    #     serializer = CategoriesSerializer(categories, many=True)
+    #     return Response(serializer.data, status=200)
+
     def get(self, request):
-        categories = Category.objects.all()
+        # Annotate each category with the count of related posts
+        categories = Category.objects.annotate(num_posts=Count('posts'), num_published_posts=Count('posts'))
+
         serializer = CategoriesSerializer(categories, many=True)
         return Response(serializer.data, status=200)
+
+
+class PostsByCategory(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, category_name):
+        try:
+            category = Category.objects.get(category_name=category_name.title())
+            posts = Post.objects.filter(category=category, status='published')
+            if len(posts) == 0:
+                return Response({"detail": f"No posts found in '{category}' category!"}, status=status.HTTP_404_NOT_FOUND)
+            serializer = PostSerializer(posts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Category.DoesNotExist:
+            return Response({"detail": "Category not found."}, status=status.HTTP_404_NOT_FOUND)

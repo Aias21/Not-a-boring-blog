@@ -47,7 +47,7 @@ class PostSerializer(serializers.ModelSerializer):
     last_updated = serializers.DateTimeField(format="%d-%B-%Y %H:%M", validators=[DateValidator()], required=False)
     title = serializers.CharField(required=True, max_length=255)
     created_at = serializers.DateTimeField(format="%d-%B-%Y %H:%M", validators=[DateValidator()], required=False)
-    category = serializers.StringRelatedField(many=True)  # 
+    category = serializers.StringRelatedField(many=True)
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     author = serializers.SerializerMethodField()
 
