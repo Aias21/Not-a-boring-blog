@@ -12,7 +12,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user_id','get_categories', 'created_at', 'last_updated', 'status')
+    list_display = ('id', 'title', 'user_id','get_categories', 'created_at', 'last_updated', 'status')
     list_filter = ('category__category_name', 'status')
     search_fields = ('title', 'body', 'description')
 
@@ -30,7 +30,7 @@ class RepostRequestAdmin(admin.ModelAdmin):
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'author', 'created_at', 'parent_id')
+    list_display = ('id', 'post_id_id', 'author', 'created_at', 'parent_id')
 
 
 admin.site.register(View)

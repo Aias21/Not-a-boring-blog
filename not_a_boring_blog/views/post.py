@@ -24,7 +24,7 @@ class PostList(APIView):
     - The user will need to use the token of Admin or Moderator<p>
      ***HOW TO USE:***<p>
     <b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated. <p>
-    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login</u></i>.<p>    
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
     <b>1.2.</b> Apply the token, it should belong to <b>Admin</b> or <b>Moderator</b>. <p>
     !!! For this follow the steps:<p>
     ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
@@ -32,8 +32,8 @@ class PostList(APIView):
     ---> insert <b>Token</b> <b><i>MODERATOR_OR_ADMIN_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
     <b>1.3.</b> In order to get a list of all posts of all users <b>('published', 'editing', 'private')</b>, click on <b><i>Try it out</i></b> button.<p>
     <b>1.4.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
-    -- If successful, the API will return a json list of all existing posts. <p>
-    -- If there are any errors, appropriate error messages will be returned.<p>
+    ---> If successful, the API will return a json list of all existing posts. <p>
+    ---> If there are any errors, appropriate error messages will be returned.<p>
     """
     permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
 
@@ -72,8 +72,8 @@ class PostCreate(APIView):
                 "body": "unique text"
                 }</i></b><p>
     <b>2.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>POST</b> request to the API endpoint.<p>
-    -- If successful, the API will return a 201 message along with the code itself. <p>
-    -- If there are any errors, appropriate error messages will be returned.</ul></ul>
+    ---> If successful, the API will return a 201 message along with the code itself. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
     '''
     
     serializer_class = PostCreateSerializer
@@ -94,7 +94,7 @@ class PostDetail(APIView):
     ***HOW TO USE:***<p>
     <ul><b>1. AUTHENTICATION</b><p>
     <ul><b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated, using your token. <p>
-    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login</u></i>.<p>    
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
     <b>1.2.</b> Apply the token, it should belong to the authenticated user.<p>
     !!! For this follow the steps:<p>
     ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
@@ -133,7 +133,7 @@ class PostDetail(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, pk):
-        '''***This API allows the authenticated user update their Post:***<p>
+        '''***This API allows the authenticated user update their own Post***<p>
 
     <ul><b>1. UPDATING</b>:<p>
     <ul><b>1.1.</b> In order to put <b>json</b> information, click on <b><i>Try it out</i></b> button.<p>
@@ -157,7 +157,7 @@ class PostDetail(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, pk):
-        '''***This API allows the authenticated user delete their Post***<p>
+        '''***This API allows the authenticated user delete their own Post***<p>
     <ul><b>1. DELETING</b>:<p>
     <ul><b>1.1.</b> In order to delete a post, click on <b><i>Try it out</i></b> button.<p>
     <b>1.2.</b> In the <b><i>id integer path</i></b> provide an <b>id number</b> of the post you want to delete.<p>
@@ -180,8 +180,8 @@ class GetPublicPosts(APIView):
     ***HOW TO USE:***<p>
     <ul><b>1.1.</b> In order to get a <b>json</b> list of all public posts, click on <b><i>Try it out</i></b> button.<p>
     <b>1.2.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
-    -- If successful, the API will return a 200 message along with the json list of posts.<p>
-    -- If there are any errors, appropriate error messages will be returned.</ul></ul>'''
+    ---> If successful, the API will return a 200 message along with the json list of posts.<p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>'''
     
     permission_classes = [AllowAny]
 
@@ -200,8 +200,8 @@ class GetUserPublicPosts(APIView):
     <ul><b>1.1.</b> In order to get a <b>json</b> list of all posts of a separate user, click on <b><i>Try it out</i></b> button.<p>
     <b>1.2.</b> In the <b><i>username string path</i></b> provide a <b>username</b> of the post author.<p>
     <b>1.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
-    -- If successful, the API will return a 200 message along with the json list of this user posts.<p>
-    -- If there are any errors, appropriate error messages will be returned.</ul></ul>'''
+    ---> If successful, the API will return a 200 message along with the json list of this user posts.<p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>'''
     serializer_class = PostSerializer
     permission_classes = [AllowAny]
 
@@ -233,8 +233,8 @@ class GetUserPosts(ListAPIView):
     ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
     <b>1.3.</b> In order to get a list of all your posts <b>('published', 'editing', 'private')</b>, click on <b><i>Try it out</i></b> button.<p>
     <b>1.4.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
-    -- If successful, the API will return a json list of all existing posts. <p>
-    -- If there are any errors, appropriate error messages will be returned.</ul></ul><p>
+    ---> If successful, the API will return a json list of all existing posts. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul><p>
     """
     serializer_class = PostSerializer
     
