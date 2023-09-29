@@ -10,9 +10,39 @@ from ..serializers.repost import (
     UpdateRepostRequestSerializer,
 )
 
+##### !!!!! Do we need this in the requested body (we don't change anything there)?
+# {
+#   "requester_id": 0,
+#   "post_id": 0,
+#   "status": "requested"
+# }
 
+
+# + if post does no exist, it shown 500 error
 class CreateRepostRequest(APIView):
-    """Creates Repost Request"""
+    '''***This API allows the creation of a post request***<p>
+    <b>Requirements</b>:
+    - The user must be authenticated.
+    - The user will need to use their token.<p>
+
+    ***HOW TO USE:***<p>
+    <ul><b>1. AUTHENTICATION</b><p>
+    <ul><b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated, using your token. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to the authenticated user.<p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    ------------------------------------------------------------<p>
+    <b>2. BODY</b>:<p>
+    <b>2.1.</b> In order to send a request for a repost, click on <b><i>Try it out</i></b> button.<p>
+    <b>2.2.</b> In the <b><i>post_id integer path</i></b> provide a <b>post_id</b> of the existing post.<p> 
+    <strong>!!! DO NOT DO ANY MODIFICATIONS IN THE REQUESTED BODY !!!</strong></p>
+    <b>2.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>POST</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 201 message along with the code itself. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
+    '''
     serializer_class = RepostSerializer
 
     def post(self, request, post_id):
@@ -30,7 +60,7 @@ class CreateRepostRequest(APIView):
 
         # Create a serializer instance with the provided request data
         serializer_data = {
-            **request.data,
+            #**request.data,
             'requester_id': request.user.id,
             'post_id': post_id,
         }

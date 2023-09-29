@@ -44,10 +44,10 @@ class PostList(APIView):
 
 
 class PostCreate(APIView):
-    '''***This API allows the creation of a new post.***<p>
+    '''***This API allows the creation of a new post***<p>
     <b>Requirements</b>:
     - The user must be authenticated.
-    - The user will need to use the token.
+    - The user will need to use their token.
     - The body text you provide should not yet exist in the database.<p>
 
     ***HOW TO USE:***<p>
