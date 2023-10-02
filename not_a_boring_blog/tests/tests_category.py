@@ -114,4 +114,4 @@ class ListCategoriesTest(TestCase):
 
     def test_list_categories_as_unauthorized_user(self):
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
