@@ -98,8 +98,6 @@ class PostsByCategory(APIView):
         try:
             category = Category.objects.get(category_name=category_name.title())
             posts = Post.objects.filter(category=category, status='published')
-            if len(posts) == 0:
-                return Response({"detail": f"No posts found in '{category}' category!"}, status=status.HTTP_404_NOT_FOUND)
             serializer = PostSerializer(posts, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Category.DoesNotExist:

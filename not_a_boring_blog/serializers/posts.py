@@ -70,7 +70,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class PostCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(max_length=255)
-    description = serializers.CharField(max_length=500)
+    description = serializers.CharField(max_length=255)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
     body = serializers.CharField(validators=[UniqueBodyValidator()])  # Add UniqueBodyValidator here
 
