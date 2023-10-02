@@ -47,12 +47,17 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
-    # Include the 'bio' field from the 'Role' model
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+
+class UpdateUserBioSerializer(serializers.ModelSerializer):
     bio = serializers.CharField(max_length=500, required=False, default="")
 
     class Meta:
-        model = User
-        fields = ['username', 'email', 'bio']
+        model = Role
+        fields = ['bio']
 
 
 class ChangePasswordSerializer(serializers.Serializer):

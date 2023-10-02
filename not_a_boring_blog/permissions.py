@@ -1,6 +1,5 @@
 from rest_framework import permissions
 
-
 # to handle ownership-based permissions. 
 # This class should check if the user making the request is the owner of the post.
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -13,9 +12,9 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 
 class IsAdminRole(permissions.BasePermission):
-
+    SAFE_METHODS = ['PUT', 'OPTIONS']
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
+        if request.method in self.SAFE_METHODS:
             if request.user.role.is_admin:
                 return True
         return False

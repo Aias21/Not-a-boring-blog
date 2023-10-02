@@ -9,6 +9,7 @@ from not_a_boring_blog.serializers.user import (
     UpdateRoleSerializer,
     ChangePasswordSerializer,
     UpdateUserSerializer,
+    UpdateUserBioSerializer,
 )
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -74,7 +75,7 @@ class UpdateUserRole(APIView):
     - Go in the Request Body section and set role to true; (Only one role can be set to true at a time)
     - Press <b>Execute</b> and check Response Body for result;
     """
-    permission_classes = [IsAuthenticated, IsAdminRole]
+    permission_classes = [IsAdminRole]
     serializer_class = UpdateRoleSerializer
 
     def put(self, request, username):
@@ -123,7 +124,7 @@ class RegisterUser(APIView):
 
 class UpdateUser(APIView):
     """
-    Used to update user information - username, email and bio.
+    Used to update user information - username, email.
 
     - User needs to be authorized;
 
@@ -149,18 +150,57 @@ class UpdateUser(APIView):
     def put(self, request):
         try:
             user = User.objects.get(id=request.user.id)
-            role = Role.objects.get(user=user)  # Get the Role associated with the user
         except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-        except Role.DoesNotExist:
-            return Response({"detail": "Role not found."}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = UpdateUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
+            new_email = serializer.validated_data.get('email')
+            if new_email and User.objects.filter(email=new_email).exclude(id=user.id).exists():
+                return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateUserBio(APIView):
+    """
+        Used to update user bio.
+
+        - User needs to be authorized;
+
+        To test you will need the user token, token is generated when user logs in:
+
+        - You can get one by using the user/login/ APIView ->
+        for this you need an already registered user with user/register APIView.
+        - Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
+        (name may differ, look for a key that contains token in its name);
+        - Press on the little lock for users_list view call (you should see it on the right);
+        - Scroll down and go to TokenAuth;
+        - In this field you'll need to have something similar to: Token <u>TokenAuthKey</u>
+        <- this should be in you clipboard from the previous steps;
+        - Press <b>Try it out</b>;
+        - Go to Request Body, update the values (<b>Important to know!</b> Because it would take 2 requests, the Request body
+        displayed by swagger is filled with dummy data, but it will be updated to the user if executed. On frontend the
+        information of the user is first retrieved, and then it updated accordingly)
+        - Press <b>Execute</b> and check Response Body for result;
+        """
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateUserBioSerializer
+
+    def put(self, request):
+        try:
+            role = Role.objects.get(user=request.user)
+        except Role.DoesNotExist:
+            return Response({"detail": "Role not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UpdateUserBioSerializer(role, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+
             # Update the 'bio' field in the associated Role model
-            if 'bio' in request.data:
-                role.bio = request.data['bio']
-                role.save()
+            role.save()
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

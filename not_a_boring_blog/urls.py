@@ -15,7 +15,8 @@ from .views.user import (
     LoginUser,
     LogoutUser,
     UpdateUserRole,
-    ChangeUserPassword
+    ChangeUserPassword,
+    UpdateUserBio
 )
 from .views.comment import (
     PostCommentList,
@@ -66,6 +67,7 @@ urlpatterns = [
     path('user/users_list/', UserList.as_view(), name='users_list'),
     path('user/register/', RegisterUser.as_view(), name='register'),
     path('user/update_user/', UpdateUser.as_view(), name='update_user'),
+    path('user/update_bio/', UpdateUserBio.as_view(), name='update_bio'),
     path('user/login/', LoginUser.as_view(), name='login'),
     path('user/logout/', LogoutUser.as_view(), name='logout'),
 
