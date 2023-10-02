@@ -9,16 +9,9 @@ from ..serializers.repost import (
     RepostRequestListSerializer,
     UpdateRepostRequestSerializer,
 )
-
-##### !!!!! Do we need this in the requested body (we don't change anything there)?
-# {
-#   "requester_id": 0,
-#   "post_id": 0,
-#   "status": "requested"
-# }
+from django.shortcuts import get_object_or_404
 
 
-# + if post does no exist, it shown 500 error
 class CreateRepostRequest(APIView):
     '''***This API allows the creation of a post request***<p>
     <b>Requirements</b>:
@@ -35,10 +28,10 @@ class CreateRepostRequest(APIView):
     ---> choose <b><i>tokenAuth</i></b>,<p> 
     ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
     ------------------------------------------------------------<p>
-    <b>2. BODY</b>:<p>
+    <b>2. PARAMETERS</b>:<p>
     <b>2.1.</b> In order to send a request for a repost, click on <b><i>Try it out</i></b> button.<p>
-    <b>2.2.</b> In the <b><i>post_id integer path</i></b> provide a <b>post_id</b> of the existing post.<p> 
-    <strong>!!! DO NOT DO ANY MODIFICATIONS IN THE REQUESTED BODY !!!</strong></p>
+    <b>2.2.</b> In the <b><i>post_id integer path</i></b> provide a <b>post_id</b> of the existing post you want to repost.<p> 
+    <strong>!!! DO NOT DO ANY MODIFICATIONS IN THE REQUEST BODY !!!</strong></p>
     <b>2.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>POST</b> request to the API endpoint.<p>
     ---> If successful, the API will return a 201 message along with the code itself. <p>
     ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
@@ -47,6 +40,8 @@ class CreateRepostRequest(APIView):
 
     def post(self, request, post_id):
         # Check if the user has already created a repost request for the same post
+        post = get_object_or_404(Post, id=post_id)
+
         existing_request = RepostRequest.objects.filter(
             requester_id=request.user.id,
             post_id=post_id,
@@ -73,7 +68,27 @@ class CreateRepostRequest(APIView):
 
 
 class RepostRequestedReceivedList(APIView):
-    """Returns requests to post author"""
+    """***This API returns requests to post author***<p>
+    <b>Requirements</b>:
+    - The user must be authenticated.
+    - The user will need to use their token.<p>
+
+    ***HOW TO USE:***<p>
+    <ul><b>1. AUTHENTICATION</b><p>
+    <ul><b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated, using your token. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to the authenticated user.<p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    ------------------------------------------------------------<p>
+    <b>2. PARAMETERS</b>:<p>
+    <b>2.1.</b> In order to get a list of your posts for a repost, click on <b><i>Try it out</i></b> button.<p>
+    <b>2.2.</b>  Then press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 200 message along with the list of posts with some info which were asked for a repost. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
+    """
 
     def get(self, request):
         # Get the authenticated user (post owner)
@@ -86,7 +101,27 @@ class RepostRequestedReceivedList(APIView):
 
 
 class RepostRequestsSentList(APIView):
-    """Returns requests sent by user"""
+    '''***This API returns requests sent by the user***<p>
+    <b>Requirements</b>:
+    - The user must be authenticated.
+    - The user will need to use their token.<p>
+
+    ***HOW TO USE:***<p>
+    <ul><b>1. AUTHENTICATION</b><p>
+    <ul><b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated, using your token. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to the authenticated user.<p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    ------------------------------------------------------------<p>
+    <b>2. PARAMETERS</b>:<p>
+    <b>2.1.</b> In order to get a list of repost requests you've done, click on <b><i>Try it out</i></b> button.<p>
+    <b>2.2.</b>  Then press the <b><i>Execute</i></b> button in order to send a <b>GET</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 200 message along with the list of posts which you asked for a repost. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
+    '''
 
     def get(self, request):
         user = self.request.user
@@ -98,12 +133,35 @@ class RepostRequestsSentList(APIView):
 
 
 class UpdateRepostRequestStatus(APIView):
-    """Post author can update the status of a request by id - updates status to accepted or denied"""
+    '''***Post author can update the status of a request by id - update status to accepted or denied***<p>
+    <b>Requirements</b>:
+    - The user must be authenticated.
+    - The user will need to use their token.<p>
+
+    ***HOW TO USE:***<p>
+    <ul><b>1. AUTHENTICATION</b><p>
+    <ul><b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated, using your token. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to the authenticated owner of the post.<p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    ------------------------------------------------------------<p>
+    <b>2. PARAMETERS</b>:<p>
+    <b>2.1.</b> In order to send a request for a repost change status, click on <b><i>Try it out</i></b> button.<p>
+    <b>2.2.</b> In the <b><i>request_id integer path</i></b> provide a <b>request_id</b> of the existing request.<p> 
+    <b>2.3.</b> In the <b><i>Request body</i></b> change the default status <b>requested</b> to <b>approved</b> or <b>denied</b>.<p> 
+    <b>2.4.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>PUT</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 200 message along with the code itself. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
+    '''
     serializer_class = UpdateRepostRequestSerializer
 
     def put(self, request, request_id):
         # Get the authenticated user (post owner)
         user = self.request.user
+        #breakpoint()
 
         try:
             # Retrieve the repost request by request id and check if it belongs to the user
@@ -128,7 +186,28 @@ class UpdateRepostRequestStatus(APIView):
 
 
 class DeleteRepostRequestView(APIView):
-    """Requester can delete a request by id"""
+    '''***This API requester can delete a request by its id***<p>
+    <b>Requirements</b>:
+    - The user must be authenticated.
+    - The user will need to use their token.<p>
+
+    ***HOW TO USE:***<p>
+    <ul><b>1. AUTHENTICATION</b><p>
+    <ul><b>1.1.</b>  Before making a request to this endpoint, ensure that you are authenticated, using your token. <p>
+    ---> For this check <i><u>user/registration/</u></i> and <i><u>user/login/</u></i>.<p>    
+    <b>1.2.</b> Apply the token, it should belong to the authenticated owner of the request.<p>
+    !!! For this follow the steps:<p>
+    ---> click on the image of a <b>lock</b> in the right corner of your highlighted box, <p> 
+    ---> choose <b><i>tokenAuth</i></b>,<p> 
+    ---> insert <b>Token</b> <b><i>YOUR_TOKEN_KEY</i></b> and <b>Authorize</b>.<p>
+    ------------------------------------------------------------<p>
+    <b>2. PARAMETERS</b>:<p>
+    <b>2.1.</b> In order to delete your own repost request, click on <b><i>Try it out</i></b> button.<p>
+    <b>2.2.</b> In the <b><i>request_id integer path</i></b> provide a <b>request_id</b> of the request you want to delete.<p> 
+    <b>2.3.</b>  Press the <b><i>Execute</i></b> button in order to send a <b>DELETE</b> request to the API endpoint.<p>
+    ---> If successful, the API will return a 204 message. <p>
+    ---> If there are any errors, appropriate error messages will be returned.</ul></ul>
+    '''
     def delete(self, request, request_id):
         # Get the authenticated user (post owner)
         user = self.request.user
