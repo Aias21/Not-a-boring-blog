@@ -159,6 +159,16 @@ class UpdateUser(APIView):
             if new_email and User.objects.filter(email=new_email).exclude(id=user.id).exists():
                 return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
+            
+            if 'bio' in request.data:
+                role = Role.objects.get(user=user)
+                bio_serializer = UpdateUserBioSerializer(role, data={'bio': request.data['bio']}, partial=True)
+                if bio_serializer.is_valid():
+                    bio_serializer.save()
+                else:
+                    return Response(bio_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
+            
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
