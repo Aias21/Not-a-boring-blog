@@ -168,7 +168,8 @@ class UserListTest(TestCase):
         self.client = APIClient()
         self.user = User.objects.create(username='user', password='passworduser')
         
-        self.admin = User.objects.create(username='admin', password=make_password('adminpass'))
+        self.admin = User.objects.create(username='admin', is_staff=True, password=make_password('adminpass'))
+        # IsAdminUser doesn't understand is_admin Role, that's why we add it here
         self.admin_role = Role.objects.create(user=self.admin, is_admin=True)
         self.admin_token = Token.objects.create(user=self.admin)
 

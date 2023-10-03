@@ -47,7 +47,8 @@ class UserList(APIView):
     if not scroll a little bit down.
     """
 
-    permission_classes = [AllowAny]
+    #permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
 
     def get(self, request):
         users = User.objects.all()
@@ -160,6 +161,8 @@ class UpdateUser(APIView):
                 return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
             
+            # UpdateUserSerializer only handles the fields 'username' and 'email' for the User model. 
+            # It doesn't handle the 'bio' field because the ''bio field is part of the Role model, not the User model.
             if 'bio' in request.data:
                 role = Role.objects.get(user=user)
                 bio_serializer = UpdateUserBioSerializer(role, data={'bio': request.data['bio']}, partial=True)
