@@ -16,7 +16,7 @@ from .views.user import (
     LogoutUser,
     UpdateUserRole,
     ChangeUserPassword,
-    UpdateUserBio
+    UpdateUserBio,
 )
 from .views.comment import (
     PostCommentList,

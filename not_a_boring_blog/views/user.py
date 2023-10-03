@@ -20,7 +20,6 @@ from rest_framework.permissions import (
 )
 from rest_framework import status
 from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth import update_session_auth_hash
 from django.db.models import Q
 from not_a_boring_blog.permissions import IsAdminRole
@@ -47,8 +46,7 @@ class UserList(APIView):
     if not scroll a little bit down.
     """
 
-    #permission_classes = [AllowAny]
-    permission_classes = [IsAdminUser]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         users = User.objects.all()
@@ -76,7 +74,7 @@ class UpdateUserRole(APIView):
     - Go in the Request Body section and set role to true; (Only one role can be set to true at a time)
     - Press <b>Execute</b> and check Response Body for result;
     """
-    permission_classes = [IsAdminRole]
+    permission_classes = [IsAuthenticated, IsAdminRole]
     serializer_class = UpdateRoleSerializer
 
     def put(self, request, username):
@@ -145,7 +143,6 @@ class UpdateUser(APIView):
     information of the user is first retrieved, and then it updated accordingly)
     - Press <b>Execute</b> and check Response Body for result;
     """
-    permission_classes = [IsAuthenticated]
     serializer_class = UpdateUserSerializer
 
     def put(self, request):
@@ -160,18 +157,6 @@ class UpdateUser(APIView):
             if new_email and User.objects.filter(email=new_email).exclude(id=user.id).exists():
                 return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
-            
-            # UpdateUserSerializer only handles the fields 'username' and 'email' for the User model. 
-            # It doesn't handle the 'bio' field because the ''bio field is part of the Role model, not the User model.
-            if 'bio' in request.data:
-                role = Role.objects.get(user=user)
-                bio_serializer = UpdateUserBioSerializer(role, data={'bio': request.data['bio']}, partial=True)
-                if bio_serializer.is_valid():
-                    bio_serializer.save()
-                else:
-                    return Response(bio_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                
-            
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -198,22 +183,17 @@ class UpdateUserBio(APIView):
         information of the user is first retrieved, and then it updated accordingly)
         - Press <b>Execute</b> and check Response Body for result;
         """
-    permission_classes = [IsAuthenticated]
     serializer_class = UpdateUserBioSerializer
 
     def put(self, request):
         try:
             role = Role.objects.get(user=request.user)
         except Role.DoesNotExist:
-            return Response({"detail": "Role not found."}, status=status.HTTP_404_NOT_FOUND)
-
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
         serializer = UpdateUserBioSerializer(role, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-
-            # Update the 'bio' field in the associated Role model
             role.save()
-
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -281,8 +261,7 @@ class LoginUser(APIView):
                     try:
                         user_exists = User.objects.filter(username=username).first()                        
                     except User.DoesNotExist:
-                        return Response({"detail": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)                       
-                    
+                        return Response({"detail": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
                 if serializer.data.get("email"):
                     email = serializer.data.get("email").lower()
                     try:
@@ -293,7 +272,6 @@ class LoginUser(APIView):
                 return Response({"detail": "You need to provide username or email in order to log in!"}, status=status.HTTP_400_BAD_REQUEST)
             password = serializer.data.get("password")
             user = authenticate(username=user_exists, password=password)
-            
             if user is not None:                
                 token, created = Token.objects.get_or_create(user=user)
                 try:

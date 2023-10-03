@@ -1,10 +1,7 @@
 from rest_framework import serializers
 from ..models.user import Role
 from django.contrib.auth.models import User
-from rest_framework.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.hashers import check_password
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -18,7 +15,6 @@ class RoleSerializer(serializers.ModelSerializer):
         is_moderator = data.get('is_moderator', False)
         is_blogger = data.get('is_blogger', False)
         is_admin = data.get('is_admin', False)
-
         # Ensure that only one of the three boolean values is True
         if sum([is_moderator, is_blogger, is_admin]) != 1:
             raise serializers.ValidationError("Only one attribute can be True at a time!")
@@ -53,7 +49,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 
 class UpdateUserBioSerializer(serializers.ModelSerializer):
-    bio = serializers.CharField(max_length=500, required=False, default="")
+    bio = serializers.CharField(max_length=500, allow_blank=True, required=False, default="")
 
     class Meta:
         model = Role
