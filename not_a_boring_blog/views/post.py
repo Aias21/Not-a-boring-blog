@@ -89,7 +89,7 @@ class PostCreate(APIView):
 
 class PostDetail(APIView):
     '''***Provides detailed view of a separate post. <p>
-    Also allows for updating and deleting a post.*** <p>  
+    Also allows updating and deleting a post.*** <p>  
     
     ***HOW TO USE:***<p>
     <ul><b>1. AUTHENTICATION</b><p>
