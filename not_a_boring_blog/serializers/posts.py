@@ -50,7 +50,11 @@ class PostSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(many=True)
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     author = serializers.SerializerMethodField()
+    bio = serializers.SerializerMethodField()
 
+    def get_bio(self, obj):
+        role = Role.objects.get(user=obj.user_id)
+        return role.bio
     def get_author(self, obj):
         return obj.user_id.username
 
@@ -64,7 +68,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'user_id', 'author', 'category', 'status',
+        fields = ['id', 'title', 'user_id', 'author','bio', 'category', 'status',
                   'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 

@@ -185,6 +185,13 @@ class UpdateUserBio(APIView):
         """
     serializer_class = UpdateUserBioSerializer
 
+    def get(self, request):
+        self.permission_classes = [AllowAny]
+        try:
+            role = Role.objects.get(user=request.user)
+        except Role.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"bio": role.bio}, status.HTTP_200_OK)
     def put(self, request):
         try:
             role = Role.objects.get(user=request.user)
