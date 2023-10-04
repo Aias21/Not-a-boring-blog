@@ -29,11 +29,11 @@ class UserList(APIView):
     """
     Returns the entire list of users on the platform.
 
-    - Only users with Admin role can use this view;
+    - All users should be able to see this list;
 
-    To test you will need a Token from Admin role user:
+    To test you will need a Token:
 
-    - You can get one by using the user/login/ APIView with username:"admin" and pass:"admin1234".
+    - You can get one by using the user/login/ APIView if you have an account or user/register/ APIView and after, log in with the credentials
     Token will be returned in response after a successful login, copy this <u>TokenAuthKey</u>
     (name may differ, look for a key that contains token in its name);
     - Press on the little lock for users_list view call (you should see it on the right);
