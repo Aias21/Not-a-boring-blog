@@ -11,7 +11,6 @@ from ..models.user import User
 from django.http import Http404
 
 
-
 class PostCommentList(APIView):
     """***This API gets all comments for a given post***<p>
     <b>Requirements</b>:<p>
@@ -28,15 +27,11 @@ class PostCommentList(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, post_id):
-        try:
-            comments = Comment.objects.filter(post_id=post_id, parent_id=None)  # Retrieve top-level comments (not replies)
-            if not comments.exists():
-                raise Http404("No comments found")
-            serializer = CommentSerializer(comments, many=True, context={'request': request})
 
-        except Comment.DoesNotExist:
-            return Response({"detail": "Comments not found"}, status=status.HTTP_404_NOT_FOUND)
+        comments = Comment.objects.filter(post_id=post_id, parent_id=None)  # Retrieve top-level comments (not replies)
+        serializer = CommentSerializer(comments, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class CreateComment(APIView):
     '''***This API allows the creation of a new comment for a public post***<p>
