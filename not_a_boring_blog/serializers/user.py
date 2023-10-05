@@ -23,16 +23,16 @@ class RoleSerializer(serializers.ModelSerializer):
 
 class CustomUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=255)
-    role = RoleSerializer(default={'is_blogger': True})  # Embed the RoleSerializer
+    # role = RoleSerializer(default={'is_blogger': True})  # Embed the RoleSerializer
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True, style={'input_style': 'password'})
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'role']
+        fields = ['id', 'username', 'email', 'password']
 
     def create(self, validated_data):
-        role_data = validated_data.pop('role')  # Extract role data
+        role_data = {'is_blogger': True}  # Extract role data
         user = User.objects.create(
             username=validated_data['username'].lower(),
             email=validated_data['email'].lower(),

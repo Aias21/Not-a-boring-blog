@@ -251,7 +251,7 @@ class LoginUser(APIView):
 
     - Go to user/register_user/ to register a user if you don't have one already;
     - Press <b>Try it out</b>;
-    - In Request Body insert username/email and password;
+    - In Request Body insert username or email and password (leave an empty string for the value you don't fill*);
     - Press <b>Execute</b> and check Response Body for result;
     """
     permission_classes = [AllowAny]

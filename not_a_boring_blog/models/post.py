@@ -28,6 +28,9 @@ class Post(models.Model):
     min_read = models.CharField(max_length=50)
     description = models.CharField(max_length=200)
 
+    class Meta:
+        ordering = ['-last_updated', '-created_at']
+
     def __str__(self):
         return self.title
     
