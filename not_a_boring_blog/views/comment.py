@@ -204,6 +204,14 @@ class CreateReply(APIView):
 
 
 class ModeratorRemoveComment(APIView):
+    """Delete comment as moderator.
+
+    - Need to provide a token from a user with moderator role;
+
+    Press Try Out , insert comment id and then press execute.
+
+    Moderator should be able to remove comments that are not according to the NaBB guidelines.
+    """
     permission_classes = [IsAuthenticated, IsModeratorRole]
     serializer_class = ReplyCommentSerializer
 

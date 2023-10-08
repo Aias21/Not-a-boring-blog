@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework import status
 from ..models.post import Post
+from ..models.repost_request import RepostRequest
 from ..serializers.posts import (
     PostSerializer, 
     PostCreateSerializer, 
@@ -12,12 +13,9 @@ from ..serializers.posts import (
 from ..permissions import IsOwnerOrReadOnly, IsAdminRole, IsModeratorRole
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from ..models.user import Role, User
-from rest_framework.decorators import api_view
-from rest_framework.authtoken.models import Token
-from rest_framework import permissions
 from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404, get_list_or_404
-
+from django.db.models import Q
 
 class PostList(APIView):
     """***This API lists all posts irrespective of their status***<p>
@@ -210,15 +208,26 @@ class GetUserPublicPosts(APIView):
 
     def get_queryset(self):
         username = self.kwargs['username']
-        user = get_object_or_404(User, username=username)
-        return Post.objects.filter(user_id=user, status='published')
-    
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({"detail": f"{username} not found"}, status.HTTP_404_NOT_FOUND)
+        user_posts = Post.objects.filter(user_id=user, status='published')
+        approved_repost_requests = RepostRequest.objects.filter(requester_id=user, status='approved')
+        reposted_posts = [repost_request.post_id for repost_request in approved_repost_requests]
+        reposted_post_ids = [post.id for post in reposted_posts]
+        reposted_posts_query = Q(id__in=reposted_post_ids)
+        queryset = user_posts | Post.objects.filter(reposted_posts_query)
+
+        return queryset
+
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         if not queryset:
-            return Response({"detail": f"{self.kwargs['username']} has no posts"}, status.HTTP_200_OK)
+            return Response({"detail": f"{self.kwargs['username']} has no posts"}, status=status.HTTP_200_OK)
         serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data, status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GetUserPosts(ListAPIView):
@@ -253,6 +262,16 @@ class GetUserPosts(ListAPIView):
 
 
 class HidePost(generics.UpdateAPIView):
+    """Only accessible to moderators:
+
+    - Need to use a moderator token for authentication;
+
+    If the post is not written according to the general guidelines, the moderator can hide the post,
+    post will be set to editing.
+
+    Simply insert the post id and execute, when you try to visualize the user public post, the just
+    hidden post shouldn't be visible anymore;
+    """
     permission_classes = [IsModeratorRole]
     serializer_class = HidePostSerializer
 

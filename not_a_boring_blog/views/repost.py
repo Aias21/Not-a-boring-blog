@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from ..permissions import IsOwnerOrReadOnly
-from ..models.repost_request import RepostRequest, Post, User, Role
+from ..models.repost_request import RepostRequest, Post, User
 from ..serializers.repost import (
     RepostSerializer,
     RepostRequestListSerializer,

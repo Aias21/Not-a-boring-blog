@@ -1,5 +1,4 @@
 from django.db import models
-from .user import Role
 from .post import Post
 from django.contrib.auth.models import User
 
