@@ -10,6 +10,7 @@ from not_a_boring_blog.serializers.user import (
     ChangePasswordSerializer,
     UpdateUserSerializer,
     UpdateUserBioSerializer,
+    UserListSerializer,
 )
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -50,7 +51,7 @@ class UserList(APIView):
 
     def get(self, request):
         users = User.objects.all()
-        serializer = CustomUserSerializer(users, many=True)
+        serializer = UserListSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

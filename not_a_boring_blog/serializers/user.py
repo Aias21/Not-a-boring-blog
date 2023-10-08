@@ -21,6 +21,19 @@ class RoleSerializer(serializers.ModelSerializer):
         return data
 
 
+class BioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ['bio']
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    role = BioSerializer()
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'role']
+
+
 class CustomUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=255)
     # role = RoleSerializer(default={'is_blogger': True})  # Embed the RoleSerializer
