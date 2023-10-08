@@ -12,7 +12,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 
 class IsAdminRole(permissions.BasePermission):
-    SAFE_METHODS = ['PUT', 'OPTIONS']
+    SAFE_METHODS = ['GET', 'PUT', 'OPTIONS']
     def has_permission(self, request, view):
         if request.method in self.SAFE_METHODS:
             if request.user.role.is_admin:
@@ -21,8 +21,10 @@ class IsAdminRole(permissions.BasePermission):
 
 
 class IsModeratorRole(permissions.BasePermission):
+    SAFE_METHODS = ['GET', 'PUT', 'OPTIONS', 'DELETE']
+
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
+        if request.method in self.SAFE_METHODS:
             if request.user.role.is_moderator:
                 return True
         return False

@@ -1,9 +1,12 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from ..models.comment import Comment
-from ..serializers.comment import CommentSerializer, ReplyCommentSerializer
+from ..serializers.comment import (
+    CommentSerializer,
+    ReplyCommentSerializer,
+)
 from rest_framework.permissions import AllowAny
-from ..permissions import IsOwnerOrReadOnly
+from ..permissions import IsModeratorRole
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from ..models.post import Post
@@ -198,3 +201,19 @@ class CreateReply(APIView):
             serializer.save(author=request.user, parent_id=comment, post_id=comment.post_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ModeratorRemoveComment(APIView):
+    permission_classes = [IsAuthenticated, IsModeratorRole]
+    serializer_class = ReplyCommentSerializer
+
+    def delete(self, request, comment_id):
+        try:
+            comment = Comment.objects.get(pk=comment_id)
+            if request.user.role.is_moderator:
+                comment.delete()
+                return Response({"message": "Comment deleted successfully"})
+            else:
+                return Response({"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
+        except Comment.DoesNotExist:
+            return Response({"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)

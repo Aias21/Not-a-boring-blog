@@ -1,11 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import generics
 from rest_framework import status
 from ..models.post import Post
 from ..serializers.posts import (
     PostSerializer, 
     PostCreateSerializer, 
-    PostUpdateSerializer
+    PostUpdateSerializer,
+    HidePostSerializer,
     )
 from ..permissions import IsOwnerOrReadOnly, IsAdminRole, IsModeratorRole
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -248,3 +250,16 @@ class GetUserPosts(ListAPIView):
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class HidePost(generics.UpdateAPIView):
+    permission_classes = [IsModeratorRole]
+    serializer_class = HidePostSerializer
+
+    def put(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        serializer = HidePostSerializer(post, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

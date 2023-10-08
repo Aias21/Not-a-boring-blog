@@ -6,7 +6,8 @@ from .views.post import (
     PostCreate, 
     GetPublicPosts, 
     GetUserPublicPosts,
-    GetUserPosts
+    GetUserPosts,
+    HidePost
     )
 from .views.user import (
     UserList,
@@ -23,6 +24,7 @@ from .views.comment import (
     CreateComment,
     UpdateComment,
     CreateReply,
+    ModeratorRemoveComment,
 )
 from .views.repost import (
     CreateRepostRequest,
@@ -53,13 +55,15 @@ urlpatterns = [
     path('post/public_posts/', GetPublicPosts.as_view(), name='get-public-posts'),
     path('post/user_posts/<str:username>/', GetUserPublicPosts.as_view(), name='only-user-posts'),
     path('post/my_posts/', GetUserPosts.as_view(), name='my-posts'),
-    
+    path('post/hide_post/<int:pk>', HidePost.as_view(), name='hide-post'),
+
     #comments
     path('comment/comments/<int:post_id>/', PostCommentList.as_view(), name='comments'),
     path('comment/create_comment/<int:post_id>/', CreateComment.as_view(), name='create_comment'),
     path('comment/create_reply/<int:comment_id>/', CreateReply.as_view(), name='create_reply'),
     path('comment/update_comment/<int:comment_id>/', UpdateComment.as_view(), name='update_comment'),
     # ^ updates or deletes depending on the request method, works with comments as well as replies
+    path('comment/moderator_rm_comment/<int:comment_id>/', ModeratorRemoveComment.as_view(), name='moderator_rm_comment'),
 
     # user endpoints
     path('user/change_password/', ChangeUserPassword.as_view(), name='change_password'),

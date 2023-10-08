@@ -21,6 +21,7 @@ class ReplyCommentSerializer(serializers.ModelSerializer):
     def get_author_username(self, obj):
         return obj.author.username
 
+
 class ReplyDetailsSerializer(serializers.ModelSerializer):
     author_username = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(format="%d-%B-%Y %H:%M", required=False)
@@ -31,6 +32,7 @@ class ReplyDetailsSerializer(serializers.ModelSerializer):
 
     def get_author_username(self, obj):
         return obj.author.username
+
 
 class CommentSerializer(serializers.ModelSerializer):
     replies = ReplyDetailsSerializer(many=True)
