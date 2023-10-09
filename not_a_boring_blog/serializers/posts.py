@@ -50,12 +50,17 @@ class PostSerializer(serializers.ModelSerializer):
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     author = serializers.SerializerMethodField()
     bio = serializers.SerializerMethodField()
-
+    category_names = serializers.SerializerMethodField()
     def get_bio(self, obj):
         role = Role.objects.get(user=obj.user_id)
         return role.bio
     def get_author(self, obj):
         return obj.user_id.username
+
+    def get_category_names(self, obj):
+        category_ids = [category.id for category in obj.category.all()]
+        categories = Category.objects.filter(id__in=category_ids)
+        return [category.category_name for category in categories]
 
     def validate_description(self, value):
         return strip_tags(value)
@@ -67,7 +72,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'user_id', 'author', 'bio', 'category', 'status',
+        fields = ['id', 'title', 'user_id', 'author', 'bio', 'category', 'category_names', 'status',
                   'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 
