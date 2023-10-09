@@ -1,12 +1,11 @@
 from rest_framework import serializers
 from ..models.post import Category, Post
 from rest_framework.exceptions import ValidationError
-from datetime import date, datetime
 from django.utils.html import strip_tags
 from ..models.user import Role, User
-from .category import CategorySerializer
 from datetime import datetime
-        
+
+
 class UniqueBodyValidator:
     def __call__(self, value):
         if Post.objects.filter(body=value).exists():
@@ -47,7 +46,7 @@ class PostSerializer(serializers.ModelSerializer):
     last_updated = serializers.DateTimeField(format="%d-%B-%Y %H:%M", validators=[DateValidator()], required=False)
     title = serializers.CharField(required=True, max_length=255)
     created_at = serializers.DateTimeField(format="%d-%B-%Y %H:%M", validators=[DateValidator()], required=False)
-    category = serializers.StringRelatedField(many=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     author = serializers.SerializerMethodField()
     bio = serializers.SerializerMethodField()
@@ -68,7 +67,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'user_id', 'author','bio', 'category', 'status',
+        fields = ['id', 'title', 'user_id', 'author', 'bio', 'category', 'status',
                   'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 
