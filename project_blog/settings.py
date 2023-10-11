@@ -183,8 +183,8 @@ MEDIA_ROOT = "collections/media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-USE_S3_SETUP = os.environ.get("USE_S3_SETUP", True)
-if USE_S3_SETUP:
+USE_S3_SETUP = os.environ.get("USE_S3_SETUP", False)
+if USE_S3_SETUP == True:
     AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID") # env
     AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")  # env
     AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")  # env
