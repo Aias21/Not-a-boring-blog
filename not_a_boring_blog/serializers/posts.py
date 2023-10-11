@@ -39,7 +39,7 @@ class PostUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['title', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
+        fields = ['title', 'image', 'category', 'status', 'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -51,6 +51,7 @@ class PostSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
     bio = serializers.SerializerMethodField()
     category_names = serializers.SerializerMethodField()
+
     def get_bio(self, obj):
         role = Role.objects.get(user=obj.user_id)
         return role.bio
@@ -72,7 +73,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'user_id', 'author', 'bio', 'category', 'category_names', 'status',
+        fields = ['id', 'title', 'image', 'user_id', 'author', 'bio', 'category', 'category_names', 'status',
                   'min_read', 'description', 'body', 'created_at', 'last_updated']
 
 
@@ -81,10 +82,11 @@ class PostCreateSerializer(serializers.ModelSerializer):
     description = serializers.CharField(max_length=255)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
     body = serializers.CharField(validators=[UniqueBodyValidator()])  # Add UniqueBodyValidator here
+    image = serializers.ImageField(allow_empty_file=True, required=False)
 
     class Meta:
         model = Post
-        fields = ['title', 'category', 'status', 'min_read', 'description', 'body']
+        fields = ['title', 'image', 'category', 'status', 'min_read', 'description', 'body']
 
     def validate_description(self, value):
         return strip_tags(value)

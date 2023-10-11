@@ -17,6 +17,7 @@ from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.db.models import Q
 
+
 class PostList(APIView):
     """***This API lists all posts irrespective of their status***<p>
     <b>Requirements</b>:
@@ -82,6 +83,10 @@ class PostCreate(APIView):
         user_id = request.user.id  # Get the user_id from the request
         serializer = PostCreateSerializer(data=request.data)
         if serializer.is_valid():
+            image = request.data.get('image', None)  # Retrieve the uploaded image
+            if image:
+                # Save the image to the 'post_images/' directory
+                serializer.validated_data['image'] = image
             serializer.save(user_id_id=user_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
