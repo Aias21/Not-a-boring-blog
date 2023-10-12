@@ -16,6 +16,7 @@ from ..models.user import Role, User
 from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.db.models import Q
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class PostList(APIView):
@@ -37,6 +38,7 @@ class PostList(APIView):
     ---> If there are any errors, appropriate error messages will be returned.<p>
     """
     permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request):
         posts = Post.objects.all()
@@ -78,6 +80,7 @@ class PostCreate(APIView):
     '''
     
     serializer_class = PostCreateSerializer
+    parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request):
         user_id = request.user.id  # Get the user_id from the request

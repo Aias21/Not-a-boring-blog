@@ -175,8 +175,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = "collections/media"
+# Used when bucket S3 Bucket was active
+# MEDIA_URL = 'media/'
+# MEDIA_ROOT = "collections/media"
+
+# Actual directory user files go to
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'mediafiles')
+
+# URL used to access the media
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -184,7 +191,7 @@ MEDIA_ROOT = "collections/media"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 USE_S3_SETUP = os.environ.get("USE_S3_SETUP", False)
-if USE_S3_SETUP == True:
+if USE_S3_SETUP:
     AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID") # env
     AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")  # env
     AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")  # env
