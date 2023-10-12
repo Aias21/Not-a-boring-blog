@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from django.utils.html import strip_tags
 from ..models.user import Role, User
 from datetime import datetime
-
+from ..serializers.image import Base64ImageField
 
 class UniqueBodyValidator:
     def __call__(self, value):
@@ -82,7 +82,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
     description = serializers.CharField(max_length=255)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
     body = serializers.CharField(validators=[UniqueBodyValidator()])  # Add UniqueBodyValidator here
-    image = serializers.ImageField(allow_empty_file=True, required=False)
+    image = Base64ImageField(max_length=None, use_url=True)
 
     class Meta:
         model = Post
