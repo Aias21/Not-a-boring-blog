@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 print(SECRET_KEY)
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", False)
+DEBUG = os.environ.get("DEBUG", True)
 
 ALLOWED_HOSTS = ['*']
 
@@ -190,7 +190,7 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-USE_S3_SETUP = os.environ.get("USE_S3_SETUP", False)
+USE_S3_SETUP = os.environ.get("USE_S3_SETUP")
 if USE_S3_SETUP:
     AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID") # env
     AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")  # env
