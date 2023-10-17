@@ -11,6 +11,8 @@ ___
 
 - run python3 manage.py migrate <b>If you use default database</b> to create the tables in the database, otherwise execute this step at the end
 
+- make sure you set a SECRET_KEY in the .env file and source it with :$ source .env otherwise the project will throw and error
+
 ### *Optional* but necessary when you want to work with the setup in the settings
   
 - create a postgresql database (you will need the name of it in the environmental variables, as well your postgres credentials)
@@ -26,8 +28,7 @@ ___
 > export HOST="localhost"
 > 
 > export PORT="5432"
-> 
-> export SECRET_KEY=""
+
 
 - default database will be sqlite3 if alternative is not specified in the .env file
 
