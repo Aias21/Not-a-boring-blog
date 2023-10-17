@@ -37,7 +37,6 @@ class PostList(APIView):
     ---> If there are any errors, appropriate error messages will be returned.<p>
     """
     permission_classes = [IsAuthenticated, IsAdminRole | IsModeratorRole]
-    parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request):
         posts = Post.objects.all()
