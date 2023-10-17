@@ -9,6 +9,9 @@ ___
 ==> source <name of virtual environment>/bin/activate 
 - pip install -r requirements.txt
 - create a postgresql database (you will need the name of it in the environmental variables, as well your postgres credentials)
+
+### *Optional* but necessary when you want to work with the setup in the settings
+
 - create .env file with the following environmental variables:
 
 > export NAME=""
@@ -22,6 +25,10 @@ ___
 > export PORT="5432"
 > 
 > export SECRET_KEY=""
+
+- default database will be sqlite3 if alternative is not specified in the .env file
+
+- configure other environmental variables found in settings accordingly in your .env file 
 
 - activate your environmental variables by running source .env 
 
@@ -130,3 +137,8 @@ ___
 1. Comments
 - A visitor must be able to comment on articles.
 - Comments can have comments.
+
+## <u>Run project</u>
+
+### You should be able to run the project without the frontend, you can test the api calls at http://127.0.0.1:8000/swagger-ui/
+
