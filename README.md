@@ -9,7 +9,7 @@ ___
 ==> source <name of virtual environment>/bin/activate 
 - pip install -r requirements.txt
 
-- python3 manage.py migrate <u>If you user default database</u> to create the tables in the database, otherwise execute this step at the end
+- run python3 manage.py migrate <b>If you use default database</b> to create the tables in the database, otherwise execute this step at the end
 
 ### *Optional* but necessary when you want to work with the setup in the settings
   
