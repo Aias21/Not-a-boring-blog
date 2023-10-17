@@ -12,10 +12,6 @@ class Category(models.Model):
         return self.category_name
 
 
-def upload_to(instance, filename):
-    return 'post_images/{filename}'.format(filename=filename)
-
-
 class Post(models.Model):
     """Post model"""
     STATUS = [
@@ -32,7 +28,6 @@ class Post(models.Model):
     last_updated = models.DateTimeField(auto_now=True) # the field will be automatically updated to the current timestamp every time the object is saved (updated), regardless of whether it's a new object or an existing one
     min_read = models.CharField(max_length=50)
     description = models.CharField(max_length=200)
-    image = models.ImageField(upload_to=upload_to, blank=True, null=True)
 
     class Meta:
         ordering = ['-last_updated', '-created_at']
