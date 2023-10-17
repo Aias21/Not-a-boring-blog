@@ -8,9 +8,12 @@ ___
 
 ==> source <name of virtual environment>/bin/activate 
 - pip install -r requirements.txt
-- create a postgresql database (you will need the name of it in the environmental variables, as well your postgres credentials)
+
+- python3 manage.py migrate <u>If you user default database</u> to create the tables in the database, otherwise execute this step at the end
 
 ### *Optional* but necessary when you want to work with the setup in the settings
+  
+- create a postgresql database (you will need the name of it in the environmental variables, as well your postgres credentials)
 
 - create .env file with the following environmental variables:
 
